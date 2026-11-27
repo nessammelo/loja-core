@@ -6,3 +6,4 @@
 - Cores no CSS só por variáveis (`--bg`, `--text`, `--accent`, `--primary`...). Nada de hex/rgba de marca em `src/index.css`.
 - Testar com mais de um cliente: `CLIENT=edge npm run build` e `CLIENT=modelo npm run build`.
 - Textos e comentários em português (pt-BR).
+- Banco: cliente novo roda só `supabase/instalar.sql`. Migração nova = arquivo novo em `supabase/` (idempotente, pode rodar mais de uma vez), nome acrescentado no fim de `ORDER` em `scripts/build-install-sql.mjs` e `node scripts/build-install-sql.mjs` pra regerar o `instalar.sql`. Clientes que já estão no ar rodam só o arquivo novo.
