@@ -80,7 +80,8 @@ export default {
   features: {
     secretSanta: false,
     partnerRefs: [],
-    shipping: 'fixed',
+    shipping: 'melhorenvio', // token e CEP de origem: Admin > Pagamento e frete
+    productionDays: 7, // TODO: confirmar com a Giuliana
     paymentMode: 'whatsapp',
     shippingMode: 'whatsapp',
     customOrder: true,
