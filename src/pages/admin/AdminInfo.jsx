@@ -96,7 +96,7 @@ export default function AdminInfo() {
     setError(null)
     const trimmed = name.trim()
     const grid = parseGrid(text)
-    if (!trimmed) return setError('Dê um nome para a tabela (ex: Camiseta Oversized).')
+    if (!trimmed) return setError('Dê um nome para a tabela (ex: Modelo Padrão).')
     if (grid.length < 2) return setError('A tabela precisa de um cabeçalho e pelo menos uma linha.')
     try {
       await saveSizeChart(trimmed, grid)
@@ -181,7 +181,7 @@ export default function AdminInfo() {
 
       <h3>Tabelas de medidas</h3>
       <p className="meta" style={{ marginBottom: 12 }}>
-        Crie uma tabela por tipo de peça (ex: Camiseta Padrão, Cropped, Oversized, Moletom). Depois,
+        Crie uma tabela por tipo de peça (ex: Modelo Padrão, Modelo Grande). Depois,
         em cada produto, você escolhe qual tabela cada modelo usa.
       </p>
 
@@ -210,7 +210,7 @@ export default function AdminInfo() {
               id="chart-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Camiseta Oversized"
+              placeholder="Modelo Padrão"
             />
           </div>
           <div className="field">

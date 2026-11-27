@@ -1,9 +1,9 @@
-import { MercadoPagoConfig, Payment } from 'mercadopago'
+import { Payment } from 'mercadopago'
 import { createClient } from '@supabase/supabase-js'
 import { applyPayment } from '../lib/payments.js'
 import { orderIdFromExternalReference } from '../../src/lib/crewRef.js'
+import { mpClient } from '../lib/secrets.js'
 
-const client = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN })
 const supabase = createClient(process.env.VITE_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
 
 export default async (req) => {
@@ -18,7 +18,7 @@ export default async (req) => {
     }
 
     // Reconsulta o pagamento no MP (não confia no corpo do aviso)
-    const payment = new Payment(client)
+    const payment = new Payment(await mpClient())
     const paymentInfo = await payment.get({ id })
 
     // external_reference = id do pedido, ou "ref-pablo_<id>" quando veio por link da Crew

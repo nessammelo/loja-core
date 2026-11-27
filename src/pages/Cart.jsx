@@ -1,14 +1,26 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 import { describeDelivery, formatCep, useShippingQuote } from '../lib/shipping'
+import { useStoreModes, cartWhatsappUrl } from '../lib/storeModes'
 
 const brl = (n) => n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 
 export default function Cart() {
   const { items, removeItem, subtotal, cep, setCep } = useCart()
   const navigate = useNavigate()
-  const shipping = useShippingQuote(cep, items)
+  const modes = useStoreModes()
+  const autoShipping = modes.shipping === 'auto'
+  const viaWhatsapp = modes.payment === 'whatsapp'
+  // no frete combinado pelo WhatsApp, não cota (CEP vazio = nenhuma cotação)
+  const shipping = useShippingQuote(autoShipping ? cep : '', items)
   const fee = shipping.quote ? Number(shipping.quote.price) : null
+  const whatsappUrl = viaWhatsapp
+    ? cartWhatsappUrl(
+        items,
+        subtotal,
+        autoShipping && fee !== null ? { fee, service: shipping.quote?.serviceName, cep: formatCep(cep) } : null
+      )
+    : ''
   const total = subtotal + (fee ?? 0)
   const delivery = describeDelivery(shipping.quote)
 
@@ -17,10 +29,10 @@ export default function Cart() {
       <div className="container empty-state">
         <h2>Seu carrinho está vazio</h2>
         <p style={{ margin: '16px 0 24px' }}>
-          Adicione uma camiseta pra começar.
+          Adicione uma peça pra começar.
         </p>
         <Link to="/" className="btn btn-primary">
-          Ver camisetas
+          Ver produtos
         </Link>
       </div>
     )
@@ -69,7 +81,13 @@ export default function Cart() {
         <div className="summary-line">
           <span>Frete</span>
           <span>
-            {shipping.status === 'loading' ? 'Calculando...' : fee !== null ? brl(fee) : 'Informe o CEP'}
+            {!autoShipping
+              ? 'Combinado no WhatsApp'
+              : shipping.status === 'loading'
+                ? 'Calculando...'
+                : fee !== null
+                  ? brl(fee)
+                  : 'Informe o CEP'}
           </span>
         </div>
         {delivery && (
@@ -79,6 +97,7 @@ export default function Cart() {
         )}
       </div>
 
+      {autoShipping && (
       <div className="field shipping-cep">
         <label htmlFor="cep-carrinho">Calcular frete</label>
         <input
@@ -90,15 +109,29 @@ export default function Cart() {
           onChange={(e) => setCep(formatCep(e.target.value))}
         />
       </div>
+      )}
 
       <div className="cart-summary">
         <span>{fee === null ? 'Subtotal' : 'Total'}</span>
         <span>{brl(total)}</span>
       </div>
 
-      <button className="btn btn-primary" onClick={() => navigate('/checkout')}>
-        Ir para o checkout
-      </button>
+      {!viaWhatsapp ? (
+        <button className="btn btn-primary" onClick={() => navigate('/checkout')}>
+          Ir para o checkout
+        </button>
+      ) : whatsappUrl ? (
+        <>
+          <a className="btn btn-primary" href={whatsappUrl} target="_blank" rel="noreferrer">
+            Finalizar pelo WhatsApp
+          </a>
+          <p className="meta" style={{ marginTop: 12 }}>
+            Abre uma conversa com a loja com a lista dos itens pronta. Pagamento e entrega são combinados por lá.
+          </p>
+        </>
+      ) : (
+        <p className="report-warn">WhatsApp da loja ainda não configurado.</p>
+      )}
     </div>
   )
 }

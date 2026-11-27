@@ -3,9 +3,10 @@
 //    se tem pagamento. Aprovado -> vira "novo". Em análise -> espera mais um
 //    pouco. Nada -> "expirado".
 // 2) Pedido expirado há ~2h: manda 1 e-mail de resgate com o link do carrinho.
-import { MercadoPagoConfig, Payment } from 'mercadopago'
+import { Payment } from 'mercadopago'
 import { createClient } from '@supabase/supabase-js'
 import { applyPayment } from '../lib/payments.js'
+import { mpClient } from '../lib/secrets.js'
 import { sendOrderEmail, siteUrl, loadOrder } from '../lib/email.js'
 import { rescueCartUrl } from '../../src/lib/orderEmail.js'
 import { CREW_REFS, buildExternalReference } from '../../src/lib/crewRef.js'
@@ -24,7 +25,7 @@ const iso = (ms) => new Date(ms).toISOString()
 // Busca no MP os pagamentos do pedido. O external_reference é o id do pedido
 // ou "ref-pablo_<id>" (link da Crew), então procura em cada variante.
 async function mpPaymentsOf(orderId, extRefs = [orderId]) {
-  const client = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN })
+  const client = await mpClient()
   const all = []
   for (const extRef of extRefs) {
     const res = await new Payment(client).search({ options: { external_reference: extRef } })

@@ -29,9 +29,12 @@ export default function AdminLayout() {
         <NavLink to="/admin/medidas" className={({ isActive }) => (isActive ? 'active' : '')}>
           Medidas e avisos
         </NavLink>
+        <NavLink to="/admin/pagamento" className={({ isActive }) => (isActive ? 'active' : '')}>
+          Pagamento e frete
+        </NavLink>
         {brand.features.shipping === 'gubo' && (
           <NavLink to="/admin/frete" className={({ isActive }) => (isActive ? 'active' : '')}>
-            Frete
+            Frete Gubo
           </NavLink>
         )}
         <NavLink to="/admin/cupons" className={({ isActive }) => (isActive ? 'active' : '')}>

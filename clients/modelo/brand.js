@@ -59,5 +59,7 @@ export default {
     secretSanta: false,
     partnerRefs: [],
     shipping: 'fixed',
+    paymentMode: 'whatsapp',
+    shippingMode: 'whatsapp',
   },
 }
