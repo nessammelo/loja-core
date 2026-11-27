@@ -55,7 +55,7 @@ preview dos e-mails (Admin > Pedidos > E-mail).
 ## 4. Banco (Supabase do cliente)
 
 1. No Supabase do cliente, abrir o SQL Editor.
-2. Rodar `supabase/schema.sql` e depois as migrações de `supabase/`. (Pendente: juntar tudo num único SQL de instalação, pra não depender da ordem.)
+2. Colar o arquivo `supabase/instalar.sql` inteiro e clicar em Run. Ele cria tudo de uma vez e só roda em projeto vazio.
 3. Criar o usuário do admin em Authentication > Users.
 4. Copiar a URL do projeto e as chaves (anon e service_role).
 
@@ -77,7 +77,7 @@ preview dos e-mails (Admin > Pedidos > E-mail).
 O Mercado Pago não vai na Netlify: a própria cliente cola o Access Token em
 Admin > Pagamento e frete. A chave é testada e fica guardada só no servidor
 (tabela `store_secrets`, sem acesso público). Precisa do SQL
-`supabase/add_modos_pagamento_frete.sql`.
+`supabase/add_modos_pagamento_frete.sql` (já incluído no `instalar.sql`).
 
 ## 6. Entregar
 
