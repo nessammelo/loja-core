@@ -55,7 +55,13 @@ export default function CancelOrderModal({ order, onClose, onCancelled }) {
           {order.customers?.name ?? 'Cliente'} · {brl(order.total)}
         </p>
 
-        {paid && (
+        {paid && order.payment_method === 'whatsapp' && (
+          <div className="cancel-warning">
+            <b>Este pedido foi pago.</b> Cancelar aqui não devolve o dinheiro: combine a devolução de {brl(order.total)} com
+            a cliente pelo WhatsApp.
+          </div>
+        )}
+        {paid && order.payment_method !== 'whatsapp' && (
           <div className="cancel-warning">
             <b>Este pedido foi pago.</b> Cancelar aqui não devolve o dinheiro: faça o estorno de {brl(order.total)} no
             painel do Mercado Pago (Atividades &gt; pagamento &gt; Devolver).{' '}
