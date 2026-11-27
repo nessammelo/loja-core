@@ -27,7 +27,16 @@ export function buildWhatsappLink(order, { origin = '' } = {}) {
 
   let message = ''
 
-  if (order.status === 'expirado') {
+  if (order.status === 'aguardando pagamento' && order.payment_method === 'whatsapp') {
+    const total = Number(order.total || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+    const combinar = order.shipping_service === 'A combinar no WhatsApp'
+    message =
+      `Oi ${firstName}! Recebi seu pedido ${NAME} #${order.id.slice(0, 8)}${EMOJI}\n\n` +
+      `${itemsText}\n\n` +
+      `${combinar ? 'Subtotal' : 'Total'}: ${total}` +
+      (combinar ? '\nMe passa seu CEP pra eu calcular o frete?' : '') +
+      `\n\nVamos combinar o pagamento?`
+  } else if (order.status === 'expirado') {
     const link = origin ? `${origin}/carrinho/recuperar/${order.id}` : ''
     message =
       `Oi ${firstName}! Vi que seu pedido ${NAME} não foi finalizado e o link de pagamento expirou${EMOJI}\n\n` +

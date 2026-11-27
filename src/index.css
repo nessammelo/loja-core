@@ -2754,3 +2754,9 @@ td {
 .key-status.ok {
   color: var(--text);
 }
+
+/* Carrinho no modo WhatsApp: nome e WhatsApp antes de finalizar */
+.whatsapp-checkout {
+  margin-top: 24px;
+  max-width: 720px;
+}

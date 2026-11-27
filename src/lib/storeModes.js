@@ -47,11 +47,15 @@ const brl = (n) => Number(n || 0).toLocaleString('pt-BR', { style: 'currency', c
 
 // Mensagem pronta do carrinho pro WhatsApp da loja.
 // shipping: { fee, service, cep } quando o frete foi calculado; null = a combinar.
-export function cartWhatsappMessage(items, subtotal, shipping) {
+// orderId: pedido já registrado no admin (vai o número curto na mensagem).
+export function cartWhatsappMessage(items, subtotal, shipping, orderId) {
   const lines = items.map(
     (i) => `• ${i.qty}x ${i.productName} (${[i.modelLabel, i.color, i.size && `Tam. ${i.size}`].filter(Boolean).join(', ')}) - ${brl(i.price * i.qty)}`
   )
-  const parts = [`Oi! Quero fazer este pedido na ${brand.name}:`, '', ...lines, '', `Subtotal: ${brl(subtotal)}`]
+  const head = orderId
+    ? `Oi! Quero fazer este pedido na ${brand.name} (pedido #${String(orderId).slice(0, 8)}):`
+    : `Oi! Quero fazer este pedido na ${brand.name}:`
+  const parts = [head, '', ...lines, '', `Subtotal: ${brl(subtotal)}`]
   if (shipping && shipping.fee != null) {
     parts.push(`Frete${shipping.service ? ` (${shipping.service})` : ''}: ${brl(shipping.fee)}${shipping.cep ? ` · CEP ${shipping.cep}` : ''}`)
     parts.push(`Total: ${brl(subtotal + Number(shipping.fee))}`)
@@ -62,6 +66,6 @@ export function cartWhatsappMessage(items, subtotal, shipping) {
   return parts.join('\n')
 }
 
-export function cartWhatsappUrl(items, subtotal, shipping) {
-  return whatsappStoreUrl(cartWhatsappMessage(items, subtotal, shipping))
+export function cartWhatsappUrl(items, subtotal, shipping, orderId) {
+  return whatsappStoreUrl(cartWhatsappMessage(items, subtotal, shipping, orderId))
 }

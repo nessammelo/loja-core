@@ -3,6 +3,9 @@
 //    se tem pagamento. Aprovado -> vira "novo". Em análise -> espera mais um
 //    pouco. Nada -> "expirado".
 // 2) Pedido expirado há ~2h: manda 1 e-mail de resgate com o link do carrinho.
+// Pedido do WhatsApp (payment_method 'whatsapp') não passa pelo Mercado Pago:
+// a loja marca pago no admin. Se ficar 7 dias sem confirmar, vira "expirado",
+// sem e-mail de resgate.
 import { Payment } from 'mercadopago'
 import { createClient } from '@supabase/supabase-js'
 import { applyPayment } from '../lib/payments.js'
@@ -19,6 +22,9 @@ const MAX_WAIT_IN_REVIEW = 72 * HOUR // cartão "em análise" no MP pode demorar
 const RESCUE_AFTER = 2 * HOUR
 const RESCUE_WINDOW = 72 * HOUR // não resgata expirado muito antigo
 const RESCUE_COOLDOWN = 7 * 24 * HOUR // no máximo 1 resgate por cliente por semana
+const WHATSAPP_EXPIRE_AFTER = 7 * 24 * HOUR // pedido do WhatsApp sem confirmação
+// pedidos que passam pelo Mercado Pago (payment_method vazio nos pedidos antigos)
+const NOT_WHATSAPP = 'payment_method.is.null,payment_method.neq.whatsapp'
 
 const iso = (ms) => new Date(ms).toISOString()
 
@@ -48,6 +54,7 @@ async function expirePending(supabase, paymentsOf, now) {
       .from('orders')
       .select(cols)
       .eq('status', 'aguardando pagamento')
+      .or(NOT_WHATSAPP)
       .lt('created_at', iso(now - EXPIRE_AFTER))
       .order('created_at')
       .limit(40)
@@ -115,6 +122,7 @@ async function sendRescues(supabase, now) {
     .from('orders')
     .select('id, customer_id, created_at, cancelled_at')
     .eq('status', 'expirado')
+    .or(NOT_WHATSAPP)
     .eq('late_payment', false)
     .lt('cancelled_at', iso(now - RESCUE_AFTER))
     .gt('cancelled_at', iso(now - RESCUE_WINDOW))
@@ -180,8 +188,24 @@ async function sendRescues(supabase, now) {
   return sent
 }
 
+async function expireWhatsapp(supabase, now) {
+  const { data, error } = await supabase
+    .from('orders')
+    .update({
+      status: 'expirado',
+      cancelled_at: iso(now),
+      cancel_reason: 'Pedido do WhatsApp sem confirmação em 7 dias',
+    })
+    .eq('status', 'aguardando pagamento')
+    .eq('payment_method', 'whatsapp')
+    .lt('created_at', iso(now - WHATSAPP_EXPIRE_AFTER))
+    .select('id')
+  if (error) throw error
+  return (data || []).length
+}
+
 export async function run({ supabase, paymentsOf = mpPaymentsOf, now = Date.now() }) {
-  const expired = await expirePending(supabase, paymentsOf, now)
+  const expired = (await expirePending(supabase, paymentsOf, now)) + (await expireWhatsapp(supabase, now))
   const rescued = await sendRescues(supabase, now)
   return { expired, rescued }
 }
