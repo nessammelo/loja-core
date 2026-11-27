@@ -74,7 +74,7 @@ export function useShippingQuote(cep, items) {
 
 // "chega em até 12 dias úteis (previsão 12/11)"
 export function describeDelivery(quote) {
-  if (!quote || quote.source !== 'gubo' || !quote.days) return null
+  if (!quote || quote.source === 'fixo' || !quote.days) return null
   let text = `Chega em até ${quote.days} dias úteis`
   if (quote.eta) {
     const [y, m, d] = quote.eta.split('-')

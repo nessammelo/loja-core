@@ -92,6 +92,8 @@ Admin > Pagamento e frete. A chave é testada e fica guardada só no servidor
 | `partnerRefs: ['nome']` | links ?ref=nome e repasse de parceiros por cupom | SQLs `add_ref_crew` e `add_custos_e_crew` |
 | `shipping: 'gubo'` | frete pela API da Gubo e tela Admin > Frete | `GUBO_API_KEY` na Netlify |
 | `shipping: 'fixed'` | frete fixo (padrão) | nada |
+| `shipping: 'melhorenvio'` | frete pelo Melhor Envio, com peso e medidas no cadastro do produto; token e CEP de origem colados em Admin > Pagamento e frete | conta no Melhor Envio |
+| `productionDays` / `defaultPackage` | dias de produção somados ao prazo do frete e medida padrão quando o produto não tem medidas | nada |
 | `cancelReasons: [...]` | motivos extras de cancelamento | nada |
 | `customOrder: true` | botão "Quero personalizado" no produto, abre o WhatsApp | `contact.whatsapp` |
 | `paymentMode` | modo inicial de pagamento: `'whatsapp'` ou `'mercadopago'` | Mercado Pago conectado no admin |
