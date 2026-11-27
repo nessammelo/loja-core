@@ -13,7 +13,7 @@ export default function Header() {
         <Link to="/" className="logo">
           <img src={brand.logo} alt={brand.name} />
         </Link>
-        <nav className={`nav-links ${secretSanta ? 'has-amigo' : ''}`}>
+        <nav className={`nav-links ${secretSanta || brand.home.collectionCards ? 'nav-cheio' : ''}`}>
           <Link to="/">Loja</Link>
           {brand.home.collectionCards && <a href="/#colecoes">{brand.home.collectionsTitle}</a>}
           {secretSanta && <Link to="/amigo">Amigo secreto</Link>}
