@@ -1,3 +1,4 @@
+import { storageKey } from '../brand'
 import { supabase } from './supabase'
 
 // Amigo secreto: tudo passa pelas funções ss_* do banco, que conferem o
@@ -157,7 +158,7 @@ export function whatsappShareUrl(text) {
 // ---- grupos salvos neste aparelho ----------------------------
 // guarda os links pessoais pra pessoa voltar sem procurar no WhatsApp
 // e pra página de produto oferecer "pôr na minha lista".
-const SAVED_KEY = 'edge_amigo_v1'
+const SAVED_KEY = storageKey('amigo_v1')
 
 export function savedGroups() {
   try {

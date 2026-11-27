@@ -1,8 +1,13 @@
-// Gerador dos e-mails do pedido (mesmo layout do gerador avulso "E-mails do Pedido Edge").
+// Gerador dos e-mails do pedido.
 // Monta HTML em tabelas com estilo inline, que é o que o Gmail aceita colar.
+// Nome, cores, logo e textos de marca vêm de src/brand.js.
+import { brand, instagramUrl, instagramHandle, emailSignature } from '../brand.js'
 
-export const IG_URL = 'https://instagram.com/edge.bjj'
-export const DEFAULT_PRAZO = '10 a 15 dias úteis'
+export const IG_URL = instagramUrl
+export const DEFAULT_PRAZO = brand.copy.defaultProductionTime
+const NAME = brand.name
+const C = brand.copy
+const E = brand.email
 
 const brl = (v) => Number(v ?? 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 
@@ -26,27 +31,27 @@ export const EMAIL_TYPES = {
     tab: 'Recebemos seu pedido',
     headline: 'Recebemos seu pedido.',
     body: (v, n) =>
-      `Oi${n}. Obrigado por vestir a EDGE. Seu pagamento foi confirmado e já estamos cuidando do seu pedido. Cada peça é produzida sob demanda, por isso existe um prazo de produção antes do envio. Quando ele sair, você recebe outro e-mail com o código de rastreio.`,
+      `Oi${n}. ${C.orderThanks} Seu pagamento foi confirmado e já estamos cuidando do seu pedido. ${C.productionNote} Quando ele sair, você recebe outro e-mail com o código de rastreio.`,
     rows: (v) => [
       ['Prazo de produção', v.prazo],
       ['Valor total', v.valor],
       ['Entrega em', v.endereco],
     ],
     button: () => null,
-    subject: (v) => `Recebemos seu pedido EDGE #${v.pedido}`,
+    subject: (v) => `Recebemos seu pedido ${NAME} #${v.pedido}`,
     fields: ['prazo', 'valor', 'endereco'],
   },
   producao: {
     tab: 'Em produção',
     headline: 'Sua peça entrou em produção.',
     body: (v, n) =>
-      `Oi${n}. Seu pedido entrou em produção. Cada peça é feita sob demanda, com cuidado, e não há pressa que compense a técnica. Assim que ela estiver pronta e enviada, você recebe o código de rastreio por aqui.`,
+      `Oi${n}. ${C.inProduction} Assim que ela estiver pronta e enviada, você recebe o código de rastreio por aqui.`,
     rows: (v) => [
       ['Prazo de produção', v.prazo],
       ['Previsão de entrega', v.previsao],
     ],
     button: () => null,
-    subject: (v) => `Seu pedido EDGE #${v.pedido} está em produção`,
+    subject: (v) => `Seu pedido ${NAME} #${v.pedido} está em produção`,
     fields: ['prazo', 'previsao'],
   },
   enviado: {
@@ -60,17 +65,17 @@ export const EMAIL_TYPES = {
       ['Previsão de entrega', v.previsao],
     ],
     button: (v) => (safeUrl(v.link) ? ['Rastrear pedido', safeUrl(v.link)] : null),
-    subject: (v) => `Seu pedido EDGE #${v.pedido} está a caminho`,
+    subject: (v) => `Seu pedido ${NAME} #${v.pedido} está a caminho`,
     fields: ['transportadora', 'codigo', 'link', 'previsao'],
   },
   entregue: {
     tab: 'Pedido entregue',
     headline: 'Chegou. Tudo certo?',
     body: (v, n) =>
-      `Oi${n}. Pelos nossos dados, seu pedido foi entregue. Esperamos que a peça acompanhe você em cada treino. Se algo não saiu como esperado, é só responder este e-mail que a gente resolve. E se curtiu, marca a gente nas fotos: queremos ver a EDGE no tatame.`,
+      `Oi${n}. Pelos nossos dados, seu pedido foi entregue. ${C.deliveredWish} Se algo não saiu como esperado, é só responder este e-mail que a gente resolve.${IG_URL ? ` ${C.deliveredShare}` : ''}`,
     rows: () => [],
-    button: () => ['Marcar @edge.bjj', IG_URL],
-    subject: (v) => `Seu pedido EDGE #${v.pedido} foi entregue`,
+    button: () => (IG_URL ? [`Marcar ${instagramHandle}`, IG_URL] : null),
+    subject: (v) => `Seu pedido ${NAME} #${v.pedido} foi entregue`,
     fields: [],
   },
   cancelado: {
@@ -80,7 +85,7 @@ export const EMAIL_TYPES = {
       `Oi${n}. Seu pedido foi cancelado.${v.motivo ? ` Motivo: ${esc(v.motivo)}.` : ''} ${esc(v.estorno || '')} Se tiver qualquer dúvida, é só responder este e-mail.`,
     rows: (v) => [['Valor do pedido', v.valor]],
     button: () => null,
-    subject: (v) => `Seu pedido EDGE #${v.pedido} foi cancelado`,
+    subject: (v) => `Seu pedido ${NAME} #${v.pedido} foi cancelado`,
     fields: ['motivo', 'estorno', 'valor'],
   },
   resgate: {
@@ -95,7 +100,7 @@ export const EMAIL_TYPES = {
       const c = (v.cupom || '').trim()
       return ['Voltar pro carrinho', c && !/[?&]cupom=/.test(u) ? `${u}${u.includes('?') ? '&' : '?'}cupom=${encodeURIComponent(c)}` : u]
     },
-    subject: () => 'Seu carrinho EDGE ainda está aqui',
+    subject: () => `Seu carrinho ${NAME} ainda está aqui`,
     fields: ['link', 'cupom'],
   },
 }
@@ -150,7 +155,8 @@ export function emailSubject(type, v) {
 export function buildEmailHtml(type, v, logoSrc) {
   const T = EMAIL_TYPES[type]
   const F = 'Arial, Helvetica, sans-serif'
-  const D = "Impact, 'Arial Narrow Bold', 'Arial Black', Arial, sans-serif"
+  const D = E.displayFont
+  const [LW, LH] = brand.logoEmailSize
   const nome = v.nome ? ', ' + esc(v.nome) : ''
   const itens = (v.itens || '')
     .split('\n')
@@ -172,7 +178,7 @@ export function buildEmailHtml(type, v, logoSrc) {
   const detailBlock = rows.length
     ? `
    <tr><td style="padding:28px 32px 0;">
-     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f5f3ee;">
+     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${E.pageBg};">
       <tr><td style="padding:22px 24px;">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">${detail}</table>
       </td></tr>
@@ -184,7 +190,7 @@ export function buildEmailHtml(type, v, logoSrc) {
   const button = b
     ? `
     <tr><td style="padding:24px 32px 0;" align="left">
-      <a href="${esc(b[1])}" target="_blank" style="display:inline-block;background:#0a0a0a;color:#f5f3ee;font-family:${F};font-size:14px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;text-decoration:none;padding:15px 30px;">${esc(b[0])}</a>
+      <a href="${esc(b[1])}" target="_blank" style="display:inline-block;background:${E.buttonBg};color:${E.buttonText};font-family:${F};font-size:14px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;text-decoration:none;padding:15px 30px;">${esc(b[0])}</a>
     </td></tr>`
     : ''
 
@@ -202,15 +208,15 @@ export function buildEmailHtml(type, v, logoSrc) {
     : ''
 
   return `
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f5f3ee;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${E.pageBg};">
  <tr><td align="center" style="padding:24px 12px;">
   <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px;background:#ffffff;border:1px solid #e4e0d6;">
-   <tr><td align="center" style="background:#000000;padding:26px 24px;">
-     <img src="${esc(logoSrc)}" width="125" height="75" alt="EDGE" style="display:block;border:0;width:125px;height:75px;">
+   <tr><td align="center" style="background:${E.headerBg};padding:26px 24px;">
+     <img src="${esc(logoSrc)}" width="${LW}" height="${LH}" alt="${esc(NAME)}" style="display:block;border:0;width:${LW}px;height:${LH}px;">
    </td></tr>
    <tr><td style="padding:40px 32px 0;font-family:${F};">
      <div style="font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#8f8d84;">Pedido #${esc(v.pedido || '—')}</div>
-     <div style="font-family:${D};font-size:38px;line-height:1.05;letter-spacing:1px;text-transform:uppercase;color:#0a0a0a;padding:10px 0 16px;">${esc(T.headline)}</div>
+     <div style="font-family:${D};font-size:38px;line-height:1.05;letter-spacing:1px;text-transform:${E.headlineTransform};color:#0a0a0a;padding:10px 0 16px;">${esc(T.headline)}</div>
      <div style="font-size:15px;line-height:1.6;color:#2a2a26;">${T.body(v, nome)}</div>
    </td></tr>
    ${detailBlock}
@@ -220,9 +226,9 @@ export function buildEmailHtml(type, v, logoSrc) {
    <tr><td style="padding:36px 32px 36px;font-family:${F};">
      <div style="border-top:1px solid #e4e0d6;padding-top:22px;font-size:14px;line-height:1.6;color:#2a2a26;">
        Qualquer dúvida, é só responder este e-mail.<br>
-       <span style="color:#0a0a0a;font-weight:bold;letter-spacing:2px;text-transform:uppercase;font-size:12px;">Equipe EDGE</span>
+       <span style="color:#0a0a0a;font-weight:bold;letter-spacing:2px;text-transform:uppercase;font-size:12px;">${esc(emailSignature)}</span>${IG_URL ? `
        <span style="color:#8f8d84;"> · </span>
-       <a href="${IG_URL}" target="_blank" style="color:#2a2a26;text-decoration:underline;">@edge.bjj</a>
+       <a href="${IG_URL}" target="_blank" style="color:#2a2a26;text-decoration:underline;">${esc(instagramHandle)}</a>` : ''}
      </div>
    </td></tr>
   </table>

@@ -28,3 +28,7 @@ dist-ssr
 .env.*
 !.env.example
 .netlify
+
+# Gerados por scripts/select-client.mjs
+src/brand.generated.js
+.generated

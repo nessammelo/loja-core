@@ -1,3 +1,5 @@
+import { brand } from '../brand'
+
 export default function About() {
   return (
     <div className="container" style={{ paddingBottom: 80, maxWidth: 640 }}>
@@ -5,10 +7,11 @@ export default function About() {
         <h1>Sobre</h1>
         <div className="rule" />
       </div>
-      <p style={{ color: 'var(--text-muted)', lineHeight: 1.7 }}>
-        EDGE nasceu da essência do jiu-jitsu: atitude, técnica e alma no
-        detalhe. Camisetas minimalistas pra quem vive o tatame.
-      </p>
+      {brand.about.map((p, i) => (
+        <p key={i} style={{ color: 'var(--text-muted)', lineHeight: 1.7 }}>
+          {p}
+        </p>
+      ))}
     </div>
   )
 }

@@ -7,6 +7,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { resendSend, emailConfigured, siteUrl } from '../lib/email.js'
 import { amigoEmail } from '../../src/lib/amigoEmail.js'
+import { brand } from '../../src/brand.js'
 
 export const config = { schedule: '@hourly' }
 
@@ -73,6 +74,8 @@ export async function run({ supabase, send = resendSend, configured = emailConfi
 }
 
 export default async () => {
+  // cliente sem o módulo de amigo secreto: não faz nada
+  if (!brand.features.secretSanta) return new Response('off')
   try {
     const supabase = createClient(process.env.VITE_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
     const r = await run({ supabase })

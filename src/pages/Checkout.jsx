@@ -7,6 +7,7 @@ import { COUPON_PREFILL_KEY } from './RescueCart'
 import { describeDelivery, formatCep, onlyDigits, useShippingQuote } from '../lib/shipping'
 import { formatCpf, isValidCpf, cpfDigits } from '../lib/cpf'
 import { getStoredRef } from '../lib/crewRef'
+import { brand } from '../brand'
 
 // Mensagem do cupom aplicado. No progressivo, mostra a faixa e quanto falta pra próxima.
 function couponAppliedMessage(result) {
@@ -330,7 +331,7 @@ export default function Checkout() {
             <div style={{ display: 'flex', gap: 8 }}>
               <input
                 id="cupom"
-                placeholder="Ex: EDGE10"
+                placeholder={`Ex: ${brand.copy.couponExample}`}
                 value={couponInput}
                 disabled={Boolean(coupon?.valid)}
                 onChange={(e) => setCouponInput(e.target.value)}

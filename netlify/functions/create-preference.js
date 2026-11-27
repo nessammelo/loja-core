@@ -49,7 +49,7 @@ export default async (req) => {
       )
     }
 
-    // Link da Edge Crew (?ref=): o primeiro ref gravado no pedido vale.
+    // Link de parceiro (?ref=): o primeiro ref gravado no pedido vale.
     // Se a coluna orders.ref ainda não existe (SQL add_ref_crew.sql não
     // rodado), o update falha em silêncio e o ref vai só pro Mercado Pago.
     const ref = normalizeRef(order.ref) || normalizeRef(bodyRef)

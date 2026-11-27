@@ -1,3 +1,8 @@
+import { brand, instagramHandle } from '../brand'
+
+const NAME = brand.name
+const EMOJI = brand.copy.emoji ? ` ${brand.copy.emoji}` : ''
+
 function onlyDigits(str) {
   return (str || '').replace(/\D/g, '')
 }
@@ -25,35 +30,35 @@ export function buildWhatsappLink(order, { origin = '' } = {}) {
   if (order.status === 'expirado') {
     const link = origin ? `${origin}/carrinho/recuperar/${order.id}` : ''
     message =
-      `Oi ${firstName}! Vi que seu pedido EDGE não foi finalizado e o link de pagamento expirou 🖤\n\n` +
+      `Oi ${firstName}! Vi que seu pedido ${NAME} não foi finalizado e o link de pagamento expirou${EMOJI}\n\n` +
       `${itemsText}\n\n` +
       (link ? `Deixei as mesmas peças separadas aqui, é só conferir e pagar com Pix ou cartão:\n${link}` : 'Quer que eu te mande um link novo?')
   } else if (order.status === 'cancelado') {
     message =
-      `Oi ${firstName}! Passando pra avisar que seu pedido EDGE #${order.id.slice(0, 8)} foi cancelado.\n\n` +
+      `Oi ${firstName}! Passando pra avisar que seu pedido ${NAME} #${order.id.slice(0, 8)} foi cancelado.\n\n` +
       `${itemsText}\n\n` +
       (order.payment_status === 'approved' || order.payment_status === 'refunded'
         ? 'O valor pago é devolvido pelo Mercado Pago na mesma forma de pagamento. Qualquer dúvida, me chama aqui.'
         : 'Qualquer dúvida, me chama aqui.')
   } else if (order.status === 'entregue') {
     message =
-      `Oi ${firstName}! Seu pedido EDGE foi entregue 🖤\n\n` +
+      `Oi ${firstName}! Seu pedido ${NAME} foi entregue${EMOJI}\n\n` +
       `${itemsText}\n\n` +
-      `Deu tudo certo com a peça? Se curtiu, marca a gente nas fotos: @edge.bjj`
+      `Deu tudo certo com a peça?${instagramHandle ? ` Se curtiu, marca a gente nas fotos: ${instagramHandle}` : ''}`
   } else if (order.status === 'enviado' && order.tracking_code) {
     message =
-      `Oi ${firstName}! Seu pedido EDGE já foi enviado 🖤\n\n` +
+      `Oi ${firstName}! Seu pedido ${NAME} já foi enviado${EMOJI}\n\n` +
       `${itemsText}\n\n` +
       `Transportadora: ${order.carrier || 'a confirmar'}\n` +
       `Rastreio: ${order.tracking_code}`
   } else if (order.status === 'repassado') {
     message =
-      `Oi ${firstName}! Seu pedido EDGE já está em produção 🖤\n\n` +
+      `Oi ${firstName}! Seu pedido ${NAME} já está em produção${EMOJI}\n\n` +
       `${itemsText}\n\n` +
       `Assim que for enviado, te aviso por aqui com o código de rastreio.`
   } else {
     message =
-      `Oi ${firstName}! Passando pra confirmar seu pedido EDGE:\n\n${itemsText}`
+      `Oi ${firstName}! Passando pra confirmar seu pedido ${NAME}:\n\n${itemsText}`
   }
 
   return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`

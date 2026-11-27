@@ -1,21 +1,21 @@
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap');
-
 :root {
-  --bg: #0a0a0a;
-  --surface: #141412;
-  --surface-2: #1c1c19;
-  --border: #2a2a26;
-  --text: #f5f3ee;
-  --text-muted: #8f8d84;
-  --tan: #cbb489; /* uso pontual, ex: destaque editorial — nunca cor de botão/CTA */
-  --danger: #e24b4a;
-
-  /* Cor da coleção Road to Vegas — usar só em contexto dessa coleção, nunca como cor institucional */
-  --rtv-accent: #e8622f;
-  --rtv-accent-2: #f2a623;
-
-  --font-display: 'Bebas Neue', sans-serif;
+  /* Valores padrão. A marca de cada cliente sobrescreve no <head>
+     (src/brand.js > themeCss). Não colocar cor de marca aqui. */
+  --bg: #ffffff;
+  --surface: #f6f5f2;
+  --surface-2: #eeece7;
+  --border: #dedbd3;
+  --text: #1d1c1a;
+  --text-muted: #6f6c64;
+  --accent: #8a6d3b;
+  --primary: var(--text);
+  --on-primary: var(--bg);
+  --danger: #c93a39;
+  --font-display: 'Inter', sans-serif;
   --font-body: 'Inter', sans-serif;
+  --heading-transform: none;
+  --heading-letter-spacing: 0;
+  --radius: 4px;
 }
 
 * {
@@ -43,8 +43,8 @@ h2,
 h3 {
   font-family: var(--font-display);
   font-weight: 400;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+  letter-spacing: var(--heading-letter-spacing);
+  text-transform: var(--heading-transform);
   margin: 0;
 }
 
@@ -79,7 +79,7 @@ button {
   border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
-  background: rgba(10, 10, 10, 0.92);
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
   backdrop-filter: blur(6px);
   z-index: 10;
 }
@@ -139,13 +139,6 @@ button {
 }
 
 /* Só pra elementos da coleção Road to Vegas */
-.rule-rtv {
-  height: 2px;
-  width: 56px;
-  background: linear-gradient(90deg, var(--rtv-accent), var(--rtv-accent-2));
-  margin: 10px 0 20px;
-}
-
 /* Hero — altura limitada (≈28% da largura, no máx. 400px) pra os produtos
    aparecerem logo abaixo. A imagem é recortada (cover) e o texto dos banners
    fica à esquerda, por isso o recorte ancora na esquerda. */
@@ -234,7 +227,7 @@ button {
 .product-card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: var(--radius);
   overflow: hidden;
   transition: border-color 0.15s ease;
 }
@@ -288,7 +281,7 @@ button {
   justify-content: center;
   gap: 8px;
   padding: 14px 28px;
-  border-radius: 4px;
+  border-radius: var(--radius);
   border: none;
   font-size: 14px;
   font-weight: 600;
@@ -297,12 +290,12 @@ button {
 }
 
 .btn-primary {
-  background: var(--text);
-  color: var(--bg);
+  background: var(--primary);
+  color: var(--on-primary);
 }
 
 .btn-primary:hover {
-  background: var(--tan);
+  background: var(--accent);
 }
 
 .btn-secondary {
@@ -354,7 +347,7 @@ button {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(10, 10, 10, 0.6);
+  background: color-mix(in srgb, var(--bg) 60%, transparent);
   color: var(--text);
   border: none;
   width: 36px;
@@ -387,7 +380,7 @@ button {
   height: 8px;
   border-radius: 50%;
   border: none;
-  background: rgba(245, 243, 238, 0.4);
+  background: color-mix(in srgb, var(--text) 40%, transparent);
   padding: 0;
   cursor: pointer;
 }
@@ -518,7 +511,7 @@ button {
   border: 1px solid var(--border);
   color: var(--text);
   padding: 10px 12px;
-  border-radius: 4px;
+  border-radius: var(--radius);
   font-family: var(--font-body);
   font-size: 14px;
   max-width: 100%;
@@ -559,7 +552,7 @@ button {
   border: 1px solid var(--border);
   color: var(--text);
   padding: 12px 14px;
-  border-radius: 4px;
+  border-radius: var(--radius);
   font-family: var(--font-body);
   font-size: 14px;
 }
@@ -570,7 +563,7 @@ button {
   border: 1px solid var(--border);
   color: var(--text);
   padding: 12px 14px;
-  border-radius: 4px;
+  border-radius: var(--radius);
   font-family: var(--font-body);
   font-size: 14px;
 }
@@ -591,7 +584,7 @@ button {
   padding: 12px 14px;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: var(--radius);
 }
 
 .field .check-item {
@@ -749,24 +742,24 @@ td {
 }
 
 .status-novo {
-  background: rgba(245, 243, 238, 0.12);
+  background: color-mix(in srgb, var(--text) 12%, transparent);
   color: var(--text);
 }
 
 .status-repassado {
-  background: rgba(203, 180, 137, 0.15);
-  color: var(--tan);
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  color: var(--accent);
 }
 
 .status-enviado {
-  background: rgba(143, 141, 132, 0.15);
+  background: color-mix(in srgb, var(--text-muted) 15%, transparent);
   color: var(--text-muted);
 }
 
 .status-entregue {
   background: transparent;
   color: var(--text-muted);
-  border: 1px solid rgba(143, 141, 132, 0.35);
+  border: 1px solid color-mix(in srgb, var(--text-muted) 35%, transparent);
 }
 
 @media (max-width: 720px) {
@@ -1047,7 +1040,7 @@ td {
     display: block;
     text-align: left;
     padding: 16px;
-    border-radius: 4px;
+    border-radius: var(--radius);
   }
   .orders-table .order-detail-row td::before {
     display: none;
@@ -1115,7 +1108,7 @@ td {
   padding: 0;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: var(--radius);
   overflow: hidden;
   opacity: 0.6;
 }
@@ -1160,7 +1153,7 @@ td {
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  border: 1px solid #4a4a44;
+  border: 1px solid color-mix(in srgb, var(--text-muted) 60%, var(--bg));
   padding: 0;
   cursor: pointer;
 }
@@ -1217,7 +1210,7 @@ td {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  border: 1px solid #555;
+  border: 1px solid var(--text-muted);
   display: inline-block;
 }
 .color-photos {
@@ -1251,7 +1244,7 @@ td {
   background: var(--surface-2);
   border: 1px solid var(--border);
   color: var(--text);
-  border-radius: 4px;
+  border-radius: var(--radius);
   font-family: var(--font-body);
   font-size: 14px;
 }
@@ -1459,7 +1452,7 @@ td {
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--tan);
+  color: var(--accent);
 }
 
 .ss-title {
@@ -1477,7 +1470,7 @@ td {
 .ss-lead {
   margin: 0;
   max-width: 52ch;
-  color: #c9c6bd;
+  color: color-mix(in srgb, var(--text) 80%, var(--text-muted));
 }
 
 .ss-actions,
@@ -1535,7 +1528,7 @@ td {
   padding: 18px 20px;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: var(--radius);
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -1550,8 +1543,8 @@ td {
   padding: 12px;
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 4px;
-  color: #c9c6bd;
+  border-radius: var(--radius);
+  color: color-mix(in srgb, var(--text) 80%, var(--text-muted));
   word-break: break-all;
 }
 
@@ -1566,7 +1559,7 @@ td {
   padding: 12px;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: var(--radius);
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -1634,7 +1627,7 @@ td {
   padding: 16px;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: var(--radius);
   cursor: pointer;
 }
 
@@ -1667,7 +1660,7 @@ td {
   margin-bottom: 12px;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: var(--radius);
   cursor: pointer;
 }
 
@@ -1763,7 +1756,7 @@ td {
 }
 
 .ss-row-link:hover {
-  color: var(--tan);
+  color: var(--accent);
 }
 
 .ss-row-actions {
@@ -1777,7 +1770,7 @@ td {
   padding: 32px 20px;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: var(--radius);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1831,14 +1824,14 @@ td {
   align-items: center;
   padding: 10px;
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: var(--radius);
 }
 
 .ss-wish-photo {
   width: 72px;
   height: 90px;
   background: var(--surface-2);
-  border-radius: 4px;
+  border-radius: var(--radius);
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -1876,7 +1869,7 @@ td {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   padding: 3px 8px;
-  border-radius: 4px;
+  border-radius: var(--radius);
   border: 1px solid var(--border);
   color: var(--text-muted);
 }
@@ -1890,7 +1883,7 @@ td {
   padding: 16px;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: var(--radius);
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -1920,7 +1913,7 @@ td {
 
 .ss-bubble {
   padding: 10px 12px;
-  border-radius: 4px;
+  border-radius: var(--radius);
   font-size: 14px;
   line-height: 1.4;
   background: var(--surface-2);
@@ -1964,7 +1957,7 @@ td {
   padding: 0 12px;
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: var(--radius);
   color: var(--text);
   font-size: 16px;
   font-family: var(--font-body);
@@ -1993,7 +1986,7 @@ td {
   border: 1px solid var(--border);
   color: var(--text);
   padding: 12px 14px;
-  border-radius: 4px;
+  border-radius: var(--radius);
   font-family: var(--font-body);
   font-size: 14px;
 }
@@ -2312,7 +2305,7 @@ td {
 .report-day-bar-wrap { flex: 1; display: flex; align-items: flex-end; }
 .report-day-bar { width: 100%; background: var(--text); }
 .report-day-bar.empty { background: var(--border); }
-.report-day:hover .report-day-bar { background: var(--tan); }
+.report-day:hover .report-day-bar { background: var(--accent); }
 .report-day-label { font-size: 10px; color: var(--text-muted); height: 16px; margin-top: 4px; white-space: nowrap; overflow: visible; }
 .report-table td, .report-table th { font-variant-numeric: tabular-nums; }
 .report-card { overflow-x: auto; }
@@ -2335,7 +2328,7 @@ td {
   font: inherit;
   text-align: left;
 }
-.link-button:hover { color: var(--tan); }
+.link-button:hover { color: var(--accent); }
 .crew-edit { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; min-width: 220px; }
 .crew-edit input {
   background: var(--surface-2);
@@ -2355,8 +2348,8 @@ td {
 .report-kpi.highlight { border-color: var(--text-muted); }
 .report-note { margin: 0 0 12px; font-size: 12px; }
 .report-warn {
-  border: 1px solid var(--tan);
-  color: var(--tan);
+  border: 1px solid var(--accent);
+  color: var(--accent);
   padding: 10px 14px;
   font-size: 13px;
   margin: 0 0 16px;
@@ -2381,14 +2374,14 @@ td {
 
 /* ---- Pedidos: cancelado / expirado / filtros / e-mails ---- */
 .status-cancelado {
-  background: rgba(226, 75, 74, 0.12);
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
   color: var(--danger);
 }
 
 .status-expirado {
   background: transparent;
   color: var(--text-muted);
-  border: 1px dashed rgba(143, 141, 132, 0.45);
+  border: 1px dashed color-mix(in srgb, var(--text-muted) 45%, transparent);
 }
 
 .order-filters {
@@ -2429,7 +2422,7 @@ td {
 }
 
 .order-notice.is-error {
-  border-color: rgba(226, 75, 74, 0.5);
+  border-color: color-mix(in srgb, var(--danger) 50%, transparent);
   color: var(--text);
 }
 
@@ -2466,7 +2459,7 @@ td {
   border: 1px solid var(--border);
   color: var(--text);
   padding: 10px 12px;
-  border-radius: 4px;
+  border-radius: var(--radius);
   font-family: var(--font-body);
   font-size: 14px;
   flex: 1;
@@ -2487,7 +2480,7 @@ td {
 }
 
 .btn-danger-outline {
-  border-color: rgba(226, 75, 74, 0.5) !important;
+  border-color: color-mix(in srgb, var(--danger) 50%, transparent) !important;
   color: var(--danger) !important;
 }
 
@@ -2496,8 +2489,8 @@ td {
 }
 
 .cancel-warning {
-  border: 1px solid rgba(226, 75, 74, 0.5);
-  background: rgba(226, 75, 74, 0.08);
+  border: 1px solid color-mix(in srgb, var(--danger) 50%, transparent);
+  background: color-mix(in srgb, var(--danger) 8%, transparent);
   padding: 12px 14px;
   font-size: 14px;
   line-height: 1.5;

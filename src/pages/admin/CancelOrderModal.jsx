@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { cancelOrder } from '../../lib/orders'
+import { brand } from '../../brand'
 
-const REASONS = ['Cliente desistiu', 'Peça indisponível na Gubo', 'Pedido duplicado', 'Pedido de teste', 'Outro']
+const REASONS = ['Cliente desistiu', ...brand.features.cancelReasons, 'Pedido duplicado', 'Pedido de teste', 'Outro']
 
 const brl = (v) => Number(v ?? 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 

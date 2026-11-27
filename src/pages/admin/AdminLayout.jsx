@@ -1,5 +1,6 @@
 import { NavLink, Navigate, Outlet } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import { brand } from '../../brand'
 
 export default function AdminLayout() {
   const { session, loading, signOut } = useAuth()
@@ -28,15 +29,19 @@ export default function AdminLayout() {
         <NavLink to="/admin/medidas" className={({ isActive }) => (isActive ? 'active' : '')}>
           Medidas e avisos
         </NavLink>
-        <NavLink to="/admin/frete" className={({ isActive }) => (isActive ? 'active' : '')}>
-          Frete
-        </NavLink>
+        {brand.features.shipping === 'gubo' && (
+          <NavLink to="/admin/frete" className={({ isActive }) => (isActive ? 'active' : '')}>
+            Frete
+          </NavLink>
+        )}
         <NavLink to="/admin/cupons" className={({ isActive }) => (isActive ? 'active' : '')}>
           Cupons
         </NavLink>
-        <NavLink to="/admin/amigo-secreto" className={({ isActive }) => (isActive ? 'active' : '')}>
-          Amigo secreto
-        </NavLink>
+        {brand.features.secretSanta && (
+          <NavLink to="/admin/amigo-secreto" className={({ isActive }) => (isActive ? 'active' : '')}>
+            Amigo secreto
+          </NavLink>
+        )}
         <button
           className="btn btn-secondary"
           style={{ margin: '16px 24px' }}

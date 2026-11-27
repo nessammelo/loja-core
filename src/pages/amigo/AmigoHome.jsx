@@ -1,3 +1,4 @@
+import { brand } from '../../brand'
 import { Link } from 'react-router-dom'
 import useSecretSantaEnabled from '../../lib/useSecretSantaEnabled'
 import { christmasLastOrderDate, formatDate, savedGroups } from '../../lib/secretSanta'
@@ -21,7 +22,7 @@ export default function AmigoHome() {
     <div className="container ss-page">
       <section className="ss-hero">
         <div className="ss-kicker">Fim de ano</div>
-        <h1 className="ss-title">Amigo secreto Edge</h1>
+        <h1 className="ss-title">Amigo secreto {brand.name}</h1>
         <p className="ss-lead">
           Organize o amigo secreto da sua academia e acerte no presente: cada um monta a própria
           lista de desejos com o tamanho certo.

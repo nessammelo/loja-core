@@ -8,6 +8,7 @@ import {
   updateCouponCrew,
 } from '../../lib/coupons'
 import { fetchAllProductsAdmin } from '../../lib/catalog'
+import { brand, hasPartnerRefs } from '../../brand'
 
 const typeLabel = {
   percent: 'Percentual',
@@ -144,7 +145,7 @@ export default function AdminCoupons() {
             <input
               id="code"
               required
-              placeholder="EX: EDGE10"
+              placeholder={`EX: ${brand.copy.couponExample}`}
               value={form.code}
               onChange={update('code')}
             />
@@ -267,33 +268,35 @@ export default function AdminCoupons() {
           </div>
         </div>
 
-        <div className="form-grid">
-          <div className="field">
-            <label htmlFor="athleteName">Atleta da crew (opcional)</label>
-            <input
-              id="athleteName"
-              placeholder="Nome do atleta"
-              value={form.athleteName}
-              onChange={update('athleteName')}
-            />
-            <span className="meta">Preenchido = cupom da crew; entra no repasse do relatório.</span>
-          </div>
-          {form.athleteName.trim() && (
+        {hasPartnerRefs && (
+          <div className="form-grid">
             <div className="field">
-              <label htmlFor="commissionPct">Repasse pro atleta (%)</label>
+              <label htmlFor="athleteName">Atleta da crew (opcional)</label>
               <input
-                id="commissionPct"
-                type="number"
-                step="0.5"
-                min="0"
-                max="100"
-                value={form.commissionPct}
-                onChange={update('commissionPct')}
+                id="athleteName"
+                placeholder="Nome do atleta"
+                value={form.athleteName}
+                onChange={update('athleteName')}
               />
-              <span className="meta">Sobre o valor pago nas peças (com desconto, sem frete).</span>
+              <span className="meta">Preenchido = cupom da crew; entra no repasse do relatório.</span>
             </div>
-          )}
-        </div>
+            {form.athleteName.trim() && (
+              <div className="field">
+                <label htmlFor="commissionPct">Repasse pro atleta (%)</label>
+                <input
+                  id="commissionPct"
+                  type="number"
+                  step="0.5"
+                  min="0"
+                  max="100"
+                  value={form.commissionPct}
+                  onChange={update('commissionPct')}
+                />
+                <span className="meta">Sobre o valor pago nas peças (com desconto, sem frete).</span>
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="field">
           <label>Vale para quais itens?</label>
@@ -341,7 +344,7 @@ export default function AdminCoupons() {
               <th>Valor</th>
               <th>Itens</th>
               <th>Usos</th>
-              <th>Crew</th>
+              {hasPartnerRefs && <th>Crew</th>}
               <th>Validade</th>
               <th>Status</th>
               <th></th>
@@ -376,46 +379,48 @@ export default function AdminCoupons() {
                   {c.uses_count}
                   {c.max_uses ? ` / ${c.max_uses}` : ''}
                 </td>
-                <td>
-                  {crewEdit?.id === c.id ? (
-                    <div className="crew-edit">
-                      <input
-                        aria-label="Atleta"
-                        placeholder="Atleta (vazio = não é crew)"
-                        value={crewEdit.athleteName}
-                        onChange={(e) => setCrewEdit((s) => ({ ...s, athleteName: e.target.value }))}
-                      />
-                      <input
-                        aria-label="Repasse %"
-                        type="number"
-                        step="0.5"
-                        min="0"
-                        max="100"
-                        value={crewEdit.commissionPct}
-                        onChange={(e) => setCrewEdit((s) => ({ ...s, commissionPct: e.target.value }))}
-                      />
-                      <button className="btn btn-primary btn-sm" onClick={handleSaveCrew}>
-                        Salvar
+                {hasPartnerRefs && (
+                  <td>
+                    {crewEdit?.id === c.id ? (
+                      <div className="crew-edit">
+                        <input
+                          aria-label="Atleta"
+                          placeholder="Atleta (vazio = não é crew)"
+                          value={crewEdit.athleteName}
+                          onChange={(e) => setCrewEdit((s) => ({ ...s, athleteName: e.target.value }))}
+                        />
+                        <input
+                          aria-label="Repasse %"
+                          type="number"
+                          step="0.5"
+                          min="0"
+                          max="100"
+                          value={crewEdit.commissionPct}
+                          onChange={(e) => setCrewEdit((s) => ({ ...s, commissionPct: e.target.value }))}
+                        />
+                        <button className="btn btn-primary btn-sm" onClick={handleSaveCrew}>
+                          Salvar
+                        </button>
+                        <button className="btn btn-secondary btn-sm" onClick={() => setCrewEdit(null)}>
+                          Cancelar
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        className="link-button"
+                        onClick={() =>
+                          setCrewEdit({
+                            id: c.id,
+                            athleteName: c.athlete_name ?? '',
+                            commissionPct: String(c.athlete_name ? c.commission_pct ?? 5 : 5),
+                          })
+                        }
+                      >
+                        {c.athlete_name ? `${c.athlete_name} · ${Number(c.commission_pct)}%` : 'Definir'}
                       </button>
-                      <button className="btn btn-secondary btn-sm" onClick={() => setCrewEdit(null)}>
-                        Cancelar
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      className="link-button"
-                      onClick={() =>
-                        setCrewEdit({
-                          id: c.id,
-                          athleteName: c.athlete_name ?? '',
-                          commissionPct: String(c.athlete_name ? c.commission_pct ?? 5 : 5),
-                        })
-                      }
-                    >
-                      {c.athlete_name ? `${c.athlete_name} · ${Number(c.commission_pct)}%` : 'Definir'}
-                    </button>
-                  )}
-                </td>
+                    )}
+                  </td>
+                )}
                 <td>{c.expires_at ? new Date(c.expires_at).toLocaleDateString('pt-BR') : '—'}</td>
                 <td>
                   <span className={`status-badge status-${c.active ? 'enviado' : 'novo'}`}>

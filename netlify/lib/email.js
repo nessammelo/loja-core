@@ -3,7 +3,7 @@
 //
 // Variáveis na Netlify:
 //   RESEND_API_KEY  chave do Resend (sem ela, nada é enviado e nada trava)
-//   EMAIL_FROM      opcional, padrão "EDGE <pedidos@edgebjj.com.br>"
+//   EMAIL_FROM      opcional, padrão: email.from do cliente (clients/<cliente>/brand.js)
 //   EMAIL_REPLY_TO  pra onde vão as respostas do cliente (o Gmail da loja)
 import {
   EMAIL_TYPES,
@@ -11,15 +11,16 @@ import {
   emailSubject,
   emailValuesFromOrder,
 } from '../../src/lib/orderEmail.js'
+import { brand, siteUrl as brandSiteUrl, emailLogoUrl } from '../../src/brand.js'
 
 const ORDER_SELECT = '*, customers(name, email, phone), order_items(*)'
 
 export function siteUrl() {
-  return (process.env.URL || 'https://edgebjj.com.br').replace(/\/$/, '')
+  return brandSiteUrl()
 }
 
 export function emailConfigured() {
-  return Boolean(process.env.RESEND_API_KEY)
+  return Boolean(process.env.RESEND_API_KEY && (process.env.EMAIL_FROM || brand.email.from))
 }
 
 export async function loadOrder(supabase, orderId) {
@@ -30,7 +31,7 @@ export async function loadOrder(supabase, orderId) {
 
 export async function resendSend({ to, subject, html }) {
   const body = {
-    from: process.env.EMAIL_FROM || 'EDGE <pedidos@edgebjj.com.br>',
+    from: process.env.EMAIL_FROM || brand.email.from,
     to: [to],
     subject,
     html,
@@ -57,7 +58,7 @@ export async function resendSend({ to, subject, html }) {
 export async function sendOrderEmail(supabase, { order, orderId, kind, auto = true, values = {} }) {
   try {
     if (!EMAIL_TYPES[kind]) return { ok: false, error: `Tipo de e-mail desconhecido: ${kind}` }
-    if (!emailConfigured()) return { ok: false, skipped: 'not_configured', error: 'E-mails automáticos ainda não configurados (falta RESEND_API_KEY na Netlify).' }
+    if (!emailConfigured()) return { ok: false, skipped: 'not_configured', error: 'E-mails automáticos ainda não configurados (falta RESEND_API_KEY ou EMAIL_FROM na Netlify).' }
 
     const o = order || (await loadOrder(supabase, orderId))
     const to = o.customers?.email
@@ -76,7 +77,7 @@ export async function sendOrderEmail(supabase, { order, orderId, kind, auto = tr
 
     const site = siteUrl()
     const v = { ...emailValuesFromOrder(o, site), ...values }
-    const html = buildEmailHtml(kind, v, `${site}/assets/logo-edge.png`)
+    const html = buildEmailHtml(kind, v, emailLogoUrl(site))
     const subject = emailSubject(kind, v)
 
     try {

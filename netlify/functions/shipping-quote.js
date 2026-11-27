@@ -1,8 +1,10 @@
 import { createClient } from '@supabase/supabase-js'
+import { brand } from '../../src/brand.js'
 
 // Cota o frete na Gubo e guarda a cotação no Supabase. O pedido usa o valor
 // guardado (pelo id), nunca o que o navegador mandar.
 // Se a Gubo falhar, guarda o frete fixo de reserva, pra nenhuma venda travar.
+// Cliente com features.shipping = 'fixed' não usa a Gubo: sempre frete fixo.
 
 const supabase = createClient(process.env.VITE_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
 
@@ -116,6 +118,9 @@ export default async (req) => {
   const lastTry = payload.lastTry === true
 
   try {
+    if (brand.features.shipping !== 'gubo') {
+      return json(await saveQuote(cep, items, fallback('frete fixo da loja')))
+    }
     const built = await buildGuboItems(items)
     if (built.error) return json({ error: 'Um item do carrinho não existe mais.' }, 400)
     if (built.missing) {
