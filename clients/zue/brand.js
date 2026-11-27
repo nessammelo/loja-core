@@ -114,7 +114,7 @@ export default {
 
   home: {
     // seção de coleções em cards na home (como nas propostas)
-    collectionCards: true,
+    collectionCards: false,
     collectionsTitle: 'Coleções',
   },
 
