@@ -1,10 +1,12 @@
 import { createClient } from '@supabase/supabase-js'
 import { brand } from '../../src/brand.js'
+import { melhorEnvioConfig, quoteMelhorEnvio } from '../lib/melhorenvio.js'
 
 // Cota o frete na Gubo e guarda a cotação no Supabase. O pedido usa o valor
 // guardado (pelo id), nunca o que o navegador mandar.
 // Se a Gubo falhar, guarda o frete fixo de reserva, pra nenhuma venda travar.
 // Cliente com features.shipping = 'fixed' não usa a Gubo: sempre frete fixo.
+// Cliente com features.shipping = 'melhorenvio' cota no Melhor Envio (mesma reserva).
 
 const supabase = createClient(process.env.VITE_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
 
@@ -44,6 +46,49 @@ async function saveQuote(cep, items, data) {
 
 function fallback(note) {
   return { price: FALLBACK_FEE, source: 'fixo', note }
+}
+
+// Melhor Envio: um pacote por produto, com o peso/medidas do cadastro (ou o
+// padrão da loja). Se falhar, cai no frete fixo de reserva.
+async function melhorEnvioQuote(cep, items) {
+  const cfg = await melhorEnvioConfig()
+  if (!cfg.token || !cfg.cep) return fallback('Melhor Envio não configurado')
+
+  const { data: variants, error } = await supabase
+    .from('product_variants')
+    .select('id, price, products(weight_g, length_cm, width_cm, height_cm)')
+    .in('id', items.map((i) => i.product_variant_id))
+  if (error) throw error
+  const byId = new Map(variants.map((v) => [v.id, v]))
+  const d = brand.features.defaultPackage
+
+  const packages = []
+  for (const item of items) {
+    const v = byId.get(item.product_variant_id)
+    if (!v) return fallback('item inexistente')
+    const p = v.products || {}
+    packages.push({
+      weightKg: (Number(p.weight_g) || d.weightG) / 1000,
+      lengthCm: Number(p.length_cm) || d.lengthCm,
+      widthCm: Number(p.width_cm) || d.widthCm,
+      heightCm: Number(p.height_cm) || d.heightCm,
+      value: Number(v.price) || 0,
+      qty: item.qty,
+    })
+  }
+
+  try {
+    const best = await quoteMelhorEnvio({ token: cfg.token, env: cfg.env, fromCep: cfg.cep, toCep: cep, packages })
+    return {
+      price: best.price,
+      source: 'melhorenvio',
+      serviceCode: best.serviceCode,
+      serviceName: best.serviceName,
+      days: best.transitDays ? best.transitDays + (Number(brand.features.productionDays) || 0) : null,
+    }
+  } catch (err) {
+    return fallback(`melhor envio: ${err.message}`)
+  }
 }
 
 // monta os itens da Gubo: cada modelo da loja vira o SKU de exemplo da peça
@@ -118,6 +163,9 @@ export default async (req) => {
   const lastTry = payload.lastTry === true
 
   try {
+    if (brand.features.shipping === 'melhorenvio') {
+      return json(await saveQuote(cep, items, await melhorEnvioQuote(cep, items)))
+    }
     if (brand.features.shipping !== 'gubo') {
       return json(await saveQuote(cep, items, fallback('frete fixo da loja')))
     }

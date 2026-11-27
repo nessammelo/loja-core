@@ -38,6 +38,7 @@ export const ORDER = [
   'add_amigo_ideias_presente',
   'add_amigo_leads_cupom_avisos',
   'add_modos_pagamento_frete',
+  'add_melhor_envio',
 ]
 
 const head = `-- =====================================================================

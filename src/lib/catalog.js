@@ -199,6 +199,7 @@ export async function saveProduct({
   specs, // [{ label, value }]
   modelCharts, // { 'Oversized': 'Camiseta Oversized' }
   models,
+  pkg, // { weight_g, length_cm, width_cm, height_cm } só no frete Melhor Envio
 }) {
   const prices = models.map((m) => Number(m.price))
   const payload = {
@@ -211,6 +212,7 @@ export async function saveProduct({
     color_images: colorImages || {},
     specs: specs || [],
     model_charts: modelCharts || {},
+    ...(pkg || {}),
   }
 
   let productId = id
