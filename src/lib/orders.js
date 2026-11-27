@@ -66,10 +66,17 @@ export async function updateOrderStatus(orderId, status) {
 }
 
 // Pedido do WhatsApp: a loja confirma o pagamento combinado na conversa
-export async function markOrderPaid(orderId) {
+// shippingFee/total: frete combinado na conversa e o total final do pedido
+export async function markOrderPaid(orderId, { shippingFee, total, combined } = {}) {
+  const changes = { status: 'novo', payment_status: 'approved' }
+  if (shippingFee != null && total != null) {
+    changes.shipping_fee = shippingFee
+    changes.total = total
+    if (combined) changes.shipping_service = 'Combinado no WhatsApp'
+  }
   const { error } = await supabase
     .from('orders')
-    .update({ status: 'novo', payment_status: 'approved' })
+    .update(changes)
     .eq('id', orderId)
     .eq('status', 'aguardando pagamento')
   if (error) throw error

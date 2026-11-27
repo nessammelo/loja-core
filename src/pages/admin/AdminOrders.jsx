@@ -3,7 +3,6 @@ import {
   fetchOrders,
   updateOrderStatus,
   markOrderShipped,
-  markOrderPaid,
   fetchOrderEmails,
   sendOrderEmail,
   fetchRescueCoupon,
@@ -13,6 +12,7 @@ import { buildWhatsappLink } from '../../lib/whatsapp'
 import { formatCpf } from '../../lib/cpf'
 import OrderEmailModal from './OrderEmailModal'
 import CancelOrderModal from './CancelOrderModal'
+import MarkPaidModal from './MarkPaidModal'
 import { brand } from '../../brand'
 
 const statusLabel = {
@@ -105,6 +105,7 @@ export default function AdminOrders() {
   const [copiedId, setCopiedId] = useState(null)
   const [emailOrder, setEmailOrder] = useState(null)
   const [cancelOrderTarget, setCancelOrderTarget] = useState(null)
+  const [paidTarget, setPaidTarget] = useState(null)
   const [filter, setFilter] = useState('ativos')
   const [emails, setEmails] = useState({}) // order_id -> e-mails enviados
   const [notice, setNotice] = useState(null) // { ok, text }
@@ -168,9 +169,9 @@ export default function AdminOrders() {
     try {
       let next = null
       if (isWhatsappPending(order)) {
-        if (!window.confirm(`Confirmar que o pedido #${order.id.slice(0, 8)} foi pago?`)) return
-        await markOrderPaid(order.id)
-        next = 'novo'
+        // abre a janela com o frete combinado; o resto segue em handlePaid
+        setPaidTarget(order)
+        return
       } else if (order.status === 'novo') {
         await updateOrderStatus(order.id, 'repassado')
         next = 'repassado'
@@ -191,6 +192,13 @@ export default function AdminOrders() {
     } catch (err) {
       setNotice({ ok: false, text: `Não consegui mudar o status: ${err.message}` })
     }
+  }
+
+  async function handlePaid(order) {
+    setPaidTarget(null)
+    load()
+    await notifyCustomer(order, EMAIL_ON_STATUS.novo)
+    if (!order.customers?.email) setNotice({ ok: true, text: `Pedido #${order.id.slice(0, 8)} marcado como pago.` })
   }
 
   async function handleCancelled(order, { notify }) {
@@ -524,6 +532,9 @@ export default function AdminOrders() {
             setNotice({ ok: true, text: 'E-mail enviado pelo site.' })
           }}
         />
+      )}
+      {paidTarget && (
+        <MarkPaidModal order={paidTarget} onClose={() => setPaidTarget(null)} onPaid={() => handlePaid(paidTarget)} />
       )}
       {cancelOrderTarget && (
         <CancelOrderModal
