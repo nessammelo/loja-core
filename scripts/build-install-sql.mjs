@@ -40,6 +40,7 @@ export const ORDER = [
   'add_modos_pagamento_frete',
   'add_melhor_envio',
   'add_home_vitrine',
+  'add_permissoes_api',
 ]
 
 const head = `-- =====================================================================
