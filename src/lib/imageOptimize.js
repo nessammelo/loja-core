@@ -9,7 +9,8 @@ export const BANNER_MAX_WIDTH = 2880 // medida do banner: 2880×800
 const QUALITY = 0.82
 // o nome do arquivo é único (leva a data), então o navegador pode guardar por 1 ano
 export const LONG_CACHE = '31536000'
-// marca no nome dos arquivos já otimizados (o botão de otimizar pula esses)
+// marca no nome dos arquivos já conferidos: otimizados, ou que já eram leves
+// e não compensava mexer (o botão de otimizar pula esses)
 export const OPTIMIZED_TAG = '-otm-'
 
 function canvasToBlob(canvas, type, quality) {
@@ -85,8 +86,10 @@ export async function uploadOptimized(bucket, fileOrBlob, baseName, originalExt)
     if (opt) {
       body = opt.blob
       ext = opt.ext
-      tag = OPTIMIZED_TAG
     }
+    // sem opt = a foto já era leve (ou é GIF/SVG): sobe como está, mas marcada
+    // como conferida, pra não aparecer no aviso de "Fotos pesadas"
+    tag = OPTIMIZED_TAG
   } catch {
     // não conseguiu otimizar: sobe a original mesmo
   }
@@ -173,6 +176,15 @@ export async function optimizeExistingImages(onProgress = () => {}) {
         if (error) throw error
         map.set(url, supabase.storage.from(bucket).getPublicUrl(newPath).data.publicUrl)
         savedBytes += blob.size - opt.blob.size
+      } else {
+        // já era leve: só copia com a marca no nome, pra sair do aviso
+        const ext = name.includes('.') ? name.split('.').pop() : 'jpg'
+        const base = name.replace(/\.[^.]+$/, '').replace(/-\d{10,}$/, '')
+        const dir = path.includes('/') ? path.slice(0, path.lastIndexOf('/') + 1) : ''
+        const newPath = `${dir}${base}${OPTIMIZED_TAG}${Date.now()}.${ext}`
+        const { error } = await supabase.storage.from(bucket).copy(path, newPath)
+        if (error) throw error
+        map.set(url, supabase.storage.from(bucket).getPublicUrl(newPath).data.publicUrl)
       }
     } catch (err) {
       failed.push({ name, message: err.message })
