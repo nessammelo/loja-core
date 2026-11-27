@@ -146,13 +146,15 @@ export default function AdminBanners() {
 function BannerCtaForm({ banner }) {
   const [text, setText] = useState(banner.cta_text || '')
   const [link, setLink] = useState(banner.cta_link || '')
+  const [title, setTitle] = useState(banner.title || '')
+  const [subtitle, setSubtitle] = useState(banner.subtitle || '')
   const [status, setStatus] = useState(null)
 
   async function save(e) {
     e.preventDefault()
     setStatus('Salvando...')
     try {
-      await updateBannerCta(banner.id, { ctaText: text, ctaLink: link })
+      await updateBannerCta(banner.id, { ctaText: text, ctaLink: link, title, subtitle })
       setStatus(link.trim() ? 'Salvo' : 'Salvo (sem botão)')
     } catch (err) {
       setStatus(err.message)
@@ -162,6 +164,14 @@ function BannerCtaForm({ banner }) {
   return (
     <form onSubmit={save} style={{ marginTop: 10 }}>
       <div className="field" style={{ marginBottom: 8 }}>
+        <label htmlFor={`title-${banner.id}`}>Título em cima da foto (opcional)</label>
+        <input id={`title-${banner.id}`} value={title} maxLength={60} onChange={(e) => setTitle(e.target.value)} placeholder="Ex: Bolsas feitas à mão" />
+      </div>
+      <div className="field" style={{ marginBottom: 8 }}>
+        <label htmlFor={`subtitle-${banner.id}`}>Frase embaixo do título (opcional)</label>
+        <input id={`subtitle-${banner.id}`} value={subtitle} maxLength={140} onChange={(e) => setSubtitle(e.target.value)} placeholder="Ex: Peças únicas, com acabamento de alto padrão." />
+      </div>
+      <div className="field" style={{ marginBottom: 8 }}>
         <label htmlFor={`cta-text-${banner.id}`}>Texto do botão</label>
         <input id={`cta-text-${banner.id}`} value={text} maxLength={30} onChange={(e) => setText(e.target.value)} placeholder="Ex: Ver coleção" />
       </div>
@@ -170,7 +180,7 @@ function BannerCtaForm({ banner }) {
         <input id={`cta-link-${banner.id}`} value={link} onChange={(e) => setLink(e.target.value)} placeholder="Vazio = sem botão" />
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <button type="submit" className="btn btn-secondary">Salvar botão</button>
+        <button type="submit" className="btn btn-secondary">Salvar textos e botão</button>
         {status && <span className="meta">{status}</span>}
       </div>
     </form>

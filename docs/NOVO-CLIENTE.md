@@ -41,6 +41,9 @@ que também explica cada campo. Pontos de atenção:
 - `email.*`: o e-mail não lê o CSS do site, então as cores dele ficam aqui.
 - `copy.*`: frases de marca dos e-mails e do WhatsApp.
 - `contact.whatsapp`: obrigatório no modo WhatsApp (é pra onde vai o carrinho e o "Quero personalizado").
+- `home.collectionCards`: liga a seção de cards de coleção na home e o item no menu. A foto de cada card é escolhida em Admin > Coleções (sem foto, usa a capa do primeiro produto).
+- `logoFooter`, `footerFollowLabel`, `theme.colors.footerBg`/`footerText`: rodapé com outro logo/cor e o "Acompanhe a loja" com o Instagram.
+- Banner com texto por cima: em Admin > Banners, preencha título e subtítulo (sem título, o banner aparece só com a imagem e o botão no canto).
 - `features`: deixe tudo desligado, a não ser que o cliente tenha pedido. `paymentMode` e `shippingMode` são só o modo inicial: a cliente troca no admin.
 
 ## 3. Testar no computador

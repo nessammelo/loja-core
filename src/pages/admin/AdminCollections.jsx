@@ -3,10 +3,13 @@ import { fetchAllProductsAdmin } from '../../lib/catalog'
 import {
   fetchCollectionSettings,
   saveCollectionSettings,
+  saveCollectionImage,
   sortGroups,
   collectionSlug,
   DEFAULT_COLLECTION,
 } from '../../lib/collections'
+import { uploadBannerImage } from '../../lib/banners'
+import { brand } from '../../brand'
 
 export default function AdminCollections() {
   const [list, setList] = useState([]) // [{ name, count, hidden }]
@@ -17,7 +20,7 @@ export default function AdminCollections() {
 
   useEffect(() => {
     Promise.all([fetchAllProductsAdmin(), fetchCollectionSettings()])
-      .then(([products, { order, hidden }]) => {
+      .then(([products, { order, hidden, images }]) => {
         const counts = new Map()
         for (const p of products) {
           const key = p.collection || DEFAULT_COLLECTION
@@ -25,7 +28,7 @@ export default function AdminCollections() {
         }
         const groups = Array.from(counts.entries())
         const sorted = sortGroups(groups, order)
-        setList(sorted.map(([name, count]) => ({ name, count, hidden: hidden.has(name) })))
+        setList(sorted.map(([name, count]) => ({ name, count, hidden: hidden.has(name), image: images?.[name] || '' })))
       })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false))
@@ -54,6 +57,21 @@ export default function AdminCollections() {
 
   function toggleHidden(index) {
     persist(list.map((c, i) => (i === index ? { ...c, hidden: !c.hidden } : c)))
+  }
+
+  async function changeImage(c, file) {
+    if (!file) return
+    setSaving(true)
+    setError(null)
+    try {
+      const url = await uploadBannerImage(file)
+      await saveCollectionImage(c.name, url)
+      setList((l) => l.map((x) => (x.name === c.name ? { ...x, image: url } : x)))
+    } catch (err) {
+      setError('Não consegui salvar a foto: ' + err.message + ' (confira se o SQL add_home_vitrine.sql já foi rodado)')
+    } finally {
+      setSaving(false)
+    }
   }
 
   async function copyLink(c) {
@@ -117,6 +135,18 @@ export default function AdminCollections() {
                 <button className="btn btn-secondary" onClick={() => toggleHidden(i)} disabled={saving}>
                   {c.hidden ? 'Mostrar na home' : 'Ocultar'}
                 </button>
+                {brand.home.collectionCards && (
+                  <label className="btn btn-secondary" style={{ cursor: 'pointer' }}>
+                    {c.image ? 'Trocar foto do card' : 'Foto do card'}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      hidden
+                      disabled={saving}
+                      onChange={(e) => changeImage(c, e.target.files?.[0])}
+                    />
+                  </label>
+                )}
                 <button className="btn btn-secondary" onClick={() => copyLink(c)}>
                   {copied === c.name ? 'Copiado!' : 'Copiar link'}
                 </button>

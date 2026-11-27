@@ -37,6 +37,14 @@ const DEFAULTS = {
   footerLinks: [
     // { label: 'Trocas e devoluções', href: '/trocas' },
   ],
+  logoFooter: null, // logo do rodapé (vazio = mesmo do topo). Útil quando o rodapé tem outra cor.
+  footerFollowLabel: '', // ex: 'Acompanhe a loja' (aparece com o ícone do Instagram)
+
+  home: {
+    // cards de coleção na home (foto + nome), antes da lista de produtos
+    collectionCards: false,
+    collectionsTitle: 'Coleções',
+  },
 
   theme: {
     colors: {
@@ -50,6 +58,8 @@ const DEFAULTS = {
       primary: null, // fundo do botão principal (vazio = cor do texto)
       onPrimary: null, // texto do botão principal (vazio = cor do fundo)
       danger: '#c93a39',
+      footerBg: null, // fundo do rodapé (vazio = fundo do site)
+      footerText: null, // texto do rodapé (vazio = cor secundária)
     },
     fonts: {
       display: "'Inter', sans-serif", // títulos
@@ -175,6 +185,8 @@ export function themeCss() {
     '--primary': c.primary || c.text,
     '--on-primary': c.onPrimary || c.bg,
     '--danger': c.danger,
+    '--footer-bg': c.footerBg || c.bg,
+    '--footer-text': c.footerText || c.textMuted,
     '--font-display': f.display,
     '--font-body': f.body,
     '--heading-transform': brand.theme.headingTransform,
