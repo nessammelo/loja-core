@@ -33,12 +33,15 @@ export async function createBanner({ imageUrl, altText, position }) {
   if (error) throw error
 }
 
-// botão do banner: sem link = sem botão
-export async function updateBannerCta(id, { ctaText, ctaLink }) {
-  const { error } = await supabase
-    .from('banners')
-    .update({ cta_text: ctaText?.trim() || null, cta_link: ctaLink?.trim() || null })
-    .eq('id', id)
+// botão do banner: sem link = sem botão. title/subtitle = texto em cima da foto
+// (precisa do SQL add_home_vitrine.sql; sem ele, salva só o botão).
+export async function updateBannerCta(id, { ctaText, ctaLink, title, subtitle }) {
+  const base = { cta_text: ctaText?.trim() || null, cta_link: ctaLink?.trim() || null }
+  const withText = { ...base, title: title?.trim() || null, subtitle: subtitle?.trim() || null }
+  let { error } = await supabase.from('banners').update(withText).eq('id', id)
+  if (error && /title|subtitle/.test(error.message || '')) {
+    ;({ error } = await supabase.from('banners').update(base).eq('id', id))
+  }
   if (error) throw error
 }
 

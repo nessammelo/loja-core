@@ -210,10 +210,106 @@ button {
   .hero .carousel-dots {
     bottom: 14px;
   }
+  .hero.hero-with-text {
+    height: 380px;
+  }
+  .hero-text {
+    max-width: 100%;
+    justify-content: flex-end;
+    padding: 0 20px 44px;
+  }
+  .collection-cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+  .collection-card-label {
+    font-size: 16px;
+  }
 }
 
 .collection-head {
   padding-top: 56px;
+}
+
+/* Texto por cima do banner (título, subtítulo e botão à esquerda) */
+.hero.hero-with-text {
+  height: clamp(320px, 40vw, 540px);
+}
+
+.hero-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 0 clamp(20px, 6vw, 80px);
+  max-width: min(560px, 60%);
+  line-height: 1.3;
+  color: var(--text);
+}
+
+.hero-text h2 {
+  font-size: clamp(30px, 4.4vw, 60px);
+  line-height: 1.05;
+  margin: 0;
+}
+
+.hero-text p {
+  margin: 0;
+  font-size: clamp(14px, 1.3vw, 18px);
+  color: var(--text-muted);
+}
+
+.hero-text .hero-text-cta {
+  margin-top: 8px;
+  line-height: 1.5;
+}
+
+/* Cards de coleção na home (brand.home.collectionCards) */
+.collection-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 24px;
+  padding: 32px 0 8px;
+}
+
+.collection-card {
+  display: block;
+  text-decoration: none;
+  color: var(--text);
+}
+
+.collection-card-img {
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: var(--surface);
+  border-radius: var(--radius);
+}
+
+.collection-card-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.collection-card:hover .collection-card-img img {
+  transform: scale(1.03);
+}
+
+.collection-card-label {
+  display: block;
+  margin-top: 12px;
+  font-family: var(--font-display);
+  font-size: 20px;
+  text-transform: var(--heading-transform);
+  letter-spacing: var(--heading-letter-spacing);
+}
+
+.collection-card:hover .collection-card-label {
+  color: var(--accent);
 }
 
 /* Product grid — editorial: poucos produtos por linha, bastante respiro */
@@ -659,8 +755,32 @@ button {
 .site-footer {
   border-top: 1px solid var(--border);
   padding: 40px 0 24px;
-  color: var(--text-muted);
+  background: var(--footer-bg);
+  color: var(--footer-text);
   font-size: 13px;
+}
+
+.site-footer a {
+  color: inherit;
+}
+
+.footer-logo {
+  height: 30px;
+  margin-bottom: 12px;
+}
+
+/* "Acompanhe a loja" com o ícone do Instagram (brand.footerFollowLabel) */
+.footer-follow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  text-decoration: none;
+}
+
+.footer-follow small {
+  display: block;
+  opacity: 0.75;
 }
 
 .footer-grid {

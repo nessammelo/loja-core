@@ -15,6 +15,7 @@ export default function Header() {
         </Link>
         <nav className={`nav-links ${secretSanta ? 'has-amigo' : ''}`}>
           <Link to="/">Loja</Link>
+          {brand.home.collectionCards && <a href="/#colecoes">{brand.home.collectionsTitle}</a>}
           {secretSanta && <Link to="/amigo">Amigo secreto</Link>}
           <Link to="/sobre">Sobre</Link>
           {instagramUrl && (
