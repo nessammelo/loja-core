@@ -45,27 +45,14 @@ export function useStoreModes() {
 
 const brl = (n) => Number(n || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 
-// Mensagem pronta do carrinho pro WhatsApp da loja.
-// shipping: { fee, service, cep } quando o frete foi calculado; null = a combinar.
-// orderId: pedido já registrado no admin (vai o número curto na mensagem).
-export function cartWhatsappMessage(items, subtotal, shipping, orderId) {
-  const lines = items.map(
-    (i) => `• ${i.qty}x ${i.productName} (${[i.modelLabel, i.color, i.size && `Tam. ${i.size}`].filter(Boolean).join(', ')}) - ${brl(i.price * i.qty)}`
-  )
-  const head = orderId
-    ? `Oi! Quero fazer este pedido na ${brand.name} (pedido #${String(orderId).slice(0, 8)}):`
-    : `Oi! Quero fazer este pedido na ${brand.name}:`
-  const parts = [head, '', ...lines, '', `Subtotal: ${brl(subtotal)}`]
-  if (shipping && shipping.fee != null) {
-    parts.push(`Frete${shipping.service ? ` (${shipping.service})` : ''}: ${brl(shipping.fee)}${shipping.cep ? ` · CEP ${shipping.cep}` : ''}`)
-    parts.push(`Total: ${brl(subtotal + Number(shipping.fee))}`)
-  } else {
-    parts.push('Frete: a combinar')
-  }
-  parts.push('', 'Como faço pra pagar?')
-  return parts.join('\n')
-}
-
-export function cartWhatsappUrl(items, subtotal, shipping, orderId) {
-  return whatsappStoreUrl(cartWhatsappMessage(items, subtotal, shipping, orderId))
+// Final do checkout no modo WhatsApp: o pedido já está no admin, então a
+// mensagem leva só o número e o total (a loja vê os itens no admin).
+export function orderWhatsappUrl(orderId, total, shippingToCombine) {
+  const lines = [
+    `Oi! Acabei de fazer o pedido #${String(orderId).slice(0, 8)} no site da ${brand.name}.`,
+    `${shippingToCombine ? 'Subtotal' : 'Total'}: ${brl(total)}${shippingToCombine ? ' (frete a combinar)' : ''}`,
+    '',
+    'Como faço pra pagar?',
+  ]
+  return whatsappStoreUrl(lines.join('\n'))
 }

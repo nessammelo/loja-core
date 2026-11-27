@@ -32,17 +32,20 @@ export async function createOrder({ customer, address, items, shippingQuoteId, c
   return orderId
 }
 
-// Modo pagamento pelo WhatsApp: registra o pedido no admin ("aguardando
-// pagamento", payment_method 'whatsapp') antes de abrir a conversa.
-// O servidor recalcula os valores a partir das variantes e da cotação.
-export async function createWhatsappOrder({ nome, telefone, email, items, cep, shippingQuoteId }) {
+// Modo pagamento pelo WhatsApp: mesmo checkout, mas o pedido fica
+// "aguardando pagamento" (payment_method 'whatsapp') e a loja marca pago no
+// admin. O servidor recalcula tudo, igual ao createOrder.
+export async function createWhatsappOrder({ customer, address, items, shippingQuoteId, couponCode, combineShipping }) {
   const { data: orderId, error } = await supabase.rpc('create_whatsapp_order', {
-    p_name: nome,
-    p_phone: telefone,
-    p_email: email || null,
+    p_name: customer.nome,
+    p_email: customer.email,
+    p_phone: customer.telefone,
+    p_cpf: customer.cpf ? customer.cpf.replace(/\D/g, '') : null,
+    p_address: address,
     p_items: items.map((i) => ({ product_variant_id: i.variantId ?? null, qty: i.qty })),
-    p_cep: cep || null,
+    p_coupon_code: couponCode || null,
     p_shipping_quote_id: shippingQuoteId || null,
+    p_combine_shipping: Boolean(combineShipping),
   })
   if (error) throw error
   return orderId
