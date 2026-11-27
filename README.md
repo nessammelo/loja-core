@@ -1,16 +1,31 @@
-# React + Vite
+# loja-core
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Core white label da loja (React + Vite, Supabase, Netlify, Mercado Pago).
+Nasceu da loja da EDGE BJJ e serve vários clientes com o mesmo código.
 
-Currently, two official plugins are available:
+## Como funciona
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- `src/`, `netlify/`, `supabase/`: o **core**. Nenhuma marca escrita aqui.
+- `clients/<cliente>/`: tudo que muda de um cliente pro outro.
+  - `brand.js`: nome, textos, contatos, cores, fontes, e-mails e módulos ligados.
+  - `public/`: logo, favicon e imagens da marca.
+- `src/brand.js`: lê o cliente escolhido e completa com os padrões. É por ele que o core enxerga a marca.
+- A variável `CLIENT` escolhe o cliente (na Netlify de cada cliente). Sem ela, usa `modelo`.
 
-## React Compiler
+Clientes de exemplo:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- `clients/modelo`: loja em branco, ponto de partida pra um cliente novo.
+- `clients/edge`: a loja da EDGE, com todos os módulos ligados.
 
-## Expanding the Oxlint configuration
+## Rodar
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+```bash
+npm install
+CLIENT=modelo npm run dev
+```
+
+Crie um `.env.local` com `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY`.
+
+## Cliente novo
+
+Ver [docs/NOVO-CLIENTE.md](docs/NOVO-CLIENTE.md).

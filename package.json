@@ -1,10 +1,13 @@
 {
-  "name": "edge-ecommerce",
+  "name": "loja-core",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "client": "node scripts/select-client.mjs",
+    "predev": "node scripts/select-client.mjs",
     "dev": "vite",
+    "prebuild": "node scripts/select-client.mjs",
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview"

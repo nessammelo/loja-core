@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import { brand } from '../../brand'
 
 export default function AdminLogin() {
   const { session, signIn } = useAuth()
@@ -26,7 +27,7 @@ export default function AdminLogin() {
 
   return (
     <div className="container empty-state" style={{ maxWidth: 360, textAlign: 'left' }}>
-      <h1 style={{ marginBottom: 24 }}>Admin EDGE</h1>
+      <h1 style={{ marginBottom: 24 }}>Admin {brand.name}</h1>
       <form onSubmit={handleSubmit}>
         <div className="field">
           <label htmlFor="email">E-mail</label>

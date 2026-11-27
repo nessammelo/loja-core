@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 import { fetchRescueCart } from '../lib/orders'
+import { storageKey } from '../brand'
 
-export const COUPON_PREFILL_KEY = 'edge_coupon_prefill_v1'
+export const COUPON_PREFILL_KEY = storageKey('coupon_prefill_v1')
 
 const brl = (v) => Number(v ?? 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 

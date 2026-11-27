@@ -8,6 +8,7 @@ import {
   gmailComposeUrl,
 } from '../../lib/orderEmail'
 import { sendOrderEmail } from '../../lib/orders'
+import { emailLogoUrl } from '../../brand'
 
 const FIELD_LABELS = {
   prazo: 'Prazo de produção',
@@ -73,7 +74,7 @@ export default function OrderEmailModal({ order, onClose, onSent }) {
   const previewRef = useRef(null)
   const scratchRef = useRef(null)
 
-  const logoSrc = `${window.location.origin}/assets/logo-edge.png`
+  const logoSrc = emailLogoUrl(window.location.origin)
   const html = useMemo(() => buildEmailHtml(type, values, logoSrc), [type, values, logoSrc])
   const subject = emailSubject(type, values)
   const to = order.customers?.email || ''

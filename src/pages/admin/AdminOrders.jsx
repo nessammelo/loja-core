@@ -12,11 +12,12 @@ import { buildWhatsappLink } from '../../lib/whatsapp'
 import { formatCpf } from '../../lib/cpf'
 import OrderEmailModal from './OrderEmailModal'
 import CancelOrderModal from './CancelOrderModal'
+import { brand } from '../../brand'
 
 const statusLabel = {
   'aguardando pagamento': 'Aguardando pagamento',
   novo: 'Novo',
-  repassado: 'Repassado pra Gubo',
+  repassado: brand.copy.statusInProgress,
   enviado: 'Enviado',
   entregue: 'Entregue',
   cancelado: 'Cancelado',
@@ -50,7 +51,7 @@ const fmtDateTime = (d) =>
   d ? new Date(d).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : '—'
 
 const nextActionLabel = {
-  novo: 'Marcar repassado',
+  novo: brand.copy.markInProgress,
   repassado: 'Marcar enviado',
   enviado: 'Marcar entregue',
 }
@@ -65,7 +66,7 @@ function addressLines(o) {
   return [rua, a.complemento, a.bairro, cidade, a.cep ? `CEP ${a.cep}` : null].filter(Boolean)
 }
 
-// Texto pronto pra colar no pedido da Gubo / conversa com o cliente
+// Texto pronto pra colar no pedido do fornecedor / conversa com o cliente
 function buildOrderText(o) {
   const itens = o.order_items
     .map((i) => `${i.qty}x ${i.product_name} - ${i.model_label} - ${i.color} - Tam. ${i.size}`)

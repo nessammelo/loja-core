@@ -1,3 +1,4 @@
+import { brand } from '../../brand'
 import { formatPhone } from '../../lib/secretSanta'
 
 // E-mail (sem "opcional" escrito, mas não obrigatório), aceite de novidades
@@ -41,7 +42,7 @@ export default function ContactFields({ idPrefix, value, onChange, withPhone = f
       </div>
       <label className="ss-check">
         <input type="checkbox" checked={Boolean(value.optin)} onChange={set('optin')} />
-        <span>Quero receber novidades e cupons da EDGE{withPhone ? ' por e-mail e WhatsApp' : ' por e-mail'}.</span>
+        <span>Quero receber novidades e cupons da {brand.name}{withPhone ? ' por e-mail e WhatsApp' : ' por e-mail'}.</span>
       </label>
     </>
   )

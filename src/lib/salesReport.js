@@ -1,3 +1,5 @@
+import { brand } from '../brand'
+
 // Cálculos do relatório de vendas (Admin > Relatório).
 // Tudo é feito em cima dos pedidos que o admin já carrega (fetchOrders),
 // então não precisa de SQL novo.
@@ -301,7 +303,7 @@ export function athleteSummary(a, range) {
     (o) => `${dmy(o.day).slice(0, 5)} · pedido #${o.id.slice(0, 8)} · ${brlTxt(o.net)} → ${brlTxt(o.commission)}`
   )
   return [
-    `Repasse Edge BJJ · ${a.athlete}`,
+    `Repasse ${brand.name} · ${a.athlete}`,
     `Período: ${periodo}`,
     `Cupom: ${a.coupons.join(', ')}`,
     '',

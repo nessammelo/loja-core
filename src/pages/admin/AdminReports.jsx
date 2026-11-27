@@ -3,6 +3,7 @@ import { fetchOrders } from '../../lib/orders'
 import { PERIODS, periodRange, buildReport, buildCsv, athleteSummary } from '../../lib/salesReport'
 import { fetchCostMap, fetchFees, saveFees, DEFAULT_FEES } from '../../lib/costs'
 import { fetchCoupons } from '../../lib/coupons'
+import { brand, hasPartnerRefs } from '../../brand'
 const pct = (v) => `${(Number(v || 0) * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%`
 
 function AthleteCard({ a, range }) {
@@ -157,7 +158,7 @@ export default function AdminReports() {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `vendas-edge-${range.from ?? 'inicio'}-a-${range.to}.csv`
+    a.download = `vendas-${brand.slug}-${range.from ?? 'inicio'}-a-${range.to}.csv`
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -264,13 +265,15 @@ export default function AdminReports() {
           <span>Taxas Mercado Pago</span>
           <strong>{brl(r.fees)}</strong>
         </div>
-        <div className="report-kpi">
-          <span>Repasse crew</span>
-          <strong>{brl(r.commission)}</strong>
-        </div>
+        {hasPartnerRefs && (
+          <div className="report-kpi">
+            <span>Repasse crew</span>
+            <strong>{brl(r.commission)}</strong>
+          </div>
+        )}
       </div>
       <p className="meta report-note">
-        Lucro = peças vendidas (com desconto, sem frete) − custo − repasse da crew − taxa do Mercado Pago (Pix{' '}
+        Lucro = peças vendidas (com desconto, sem frete) − custo{hasPartnerRefs ? ' − repasse da crew' : ''} − taxa do Mercado Pago (Pix{' '}
         {fees.pix.toLocaleString('pt-BR')}%, cartão {fees.card.toLocaleString('pt-BR')}%, venda manual sem taxa).
       </p>
       {financeWarning && <p className="report-warn">{financeWarning}</p>}
@@ -281,21 +284,23 @@ export default function AdminReports() {
         </p>
       )}
 
-      <section className="report-card">
-        <h3>Repasse da crew</h3>
-        {r.athletes.length === 0 ? (
-          <p className="meta">
-            Nenhuma venda com cupom da crew no período. Pra marcar um cupom como da crew, vá em Cupons e preencha o
-            atleta.
-          </p>
-        ) : (
-          <ul className="athletes">
-            {r.athletes.map((a) => (
-              <AthleteCard key={a.athlete} a={a} range={range} />
-            ))}
-          </ul>
-        )}
-      </section>
+      {hasPartnerRefs && (
+        <section className="report-card">
+          <h3>Repasse da crew</h3>
+          {r.athletes.length === 0 ? (
+            <p className="meta">
+              Nenhuma venda com cupom da crew no período. Pra marcar um cupom como da crew, vá em Cupons e preencha o
+              atleta.
+            </p>
+          ) : (
+            <ul className="athletes">
+              {r.athletes.map((a) => (
+                <AthleteCard key={a.athlete} a={a} range={range} />
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
 
       <section className="report-card">
         <h3>Faturamento por dia</h3>
@@ -338,33 +343,35 @@ export default function AdminReports() {
           )}
         </section>
 
-        <section className="report-card">
-          <h3>Vendas por link da Crew</h3>
-          {r.refs.length === 0 ? (
-            <p className="meta">Nenhuma venda por link (?ref=) no período.</p>
-          ) : (
-            <table className="report-table">
-              <thead>
-                <tr>
-                  <th>Link</th>
-                  <th>Pedidos</th>
-                  <th>Vendeu</th>
-                  <th>Cupom usado</th>
-                </tr>
-              </thead>
-              <tbody>
-                {r.refs.map((x) => (
-                  <tr key={x.label}>
-                    <td>{x.label}</td>
-                    <td>{x.qty}</td>
-                    <td>{brl(x.revenue)}</td>
-                    <td>{x.coupons.length ? x.coupons.join(', ') : '—'}</td>
+        {hasPartnerRefs && (
+          <section className="report-card">
+            <h3>Vendas por link da Crew</h3>
+            {r.refs.length === 0 ? (
+              <p className="meta">Nenhuma venda por link (?ref=) no período.</p>
+            ) : (
+              <table className="report-table">
+                <thead>
+                  <tr>
+                    <th>Link</th>
+                    <th>Pedidos</th>
+                    <th>Vendeu</th>
+                    <th>Cupom usado</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </section>
+                </thead>
+                <tbody>
+                  {r.refs.map((x) => (
+                    <tr key={x.label}>
+                      <td>{x.label}</td>
+                      <td>{x.qty}</td>
+                      <td>{brl(x.revenue)}</td>
+                      <td>{x.coupons.length ? x.coupons.join(', ') : '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </section>
+        )}
 
         <section className="report-card">
           <h3>Loja x venda manual</h3>

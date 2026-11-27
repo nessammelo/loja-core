@@ -26,6 +26,7 @@ import AmigoCriar from './pages/amigo/AmigoCriar'
 import AmigoEntrar from './pages/amigo/AmigoEntrar'
 import AmigoPagina from './pages/amigo/AmigoPagina'
 import AmigoRecuperar from './pages/amigo/AmigoRecuperar'
+import { brand } from './brand'
 
 function StoreLayout() {
   return (
@@ -51,11 +52,15 @@ export default function App() {
         <Route path="/pedido-confirmado" element={<OrderConfirmation />} />
         <Route path="/colecao/:slug" element={<Collection />} />
         <Route path="/sobre" element={<About />} />
-        <Route path="/amigo" element={<AmigoHome />} />
-        <Route path="/amigo/criar" element={<AmigoCriar />} />
-        <Route path="/amigo/g/:code" element={<AmigoEntrar />} />
-        <Route path="/amigo/eu/:token" element={<AmigoPagina />} />
-        <Route path="/amigo/recuperar/:code" element={<AmigoRecuperar />} />
+        {brand.features.secretSanta && (
+          <>
+            <Route path="/amigo" element={<AmigoHome />} />
+            <Route path="/amigo/criar" element={<AmigoCriar />} />
+            <Route path="/amigo/g/:code" element={<AmigoEntrar />} />
+            <Route path="/amigo/eu/:token" element={<AmigoPagina />} />
+            <Route path="/amigo/recuperar/:code" element={<AmigoRecuperar />} />
+          </>
+        )}
       </Route>
       <Route path="/admin/login" element={<AdminLogin />} />
       <Route path="/admin" element={<AdminLayout />}>
@@ -69,8 +74,8 @@ export default function App() {
         <Route path="cupons" element={<AdminCoupons />} />
         <Route path="medidas" element={<AdminInfo />} />
         <Route path="colecoes" element={<AdminCollections />} />
-        <Route path="frete" element={<AdminShipping />} />
-        <Route path="amigo-secreto" element={<AdminAmigo />} />
+        {brand.features.shipping === 'gubo' && <Route path="frete" element={<AdminShipping />} />}
+        {brand.features.secretSanta && <Route path="amigo-secreto" element={<AdminAmigo />} />}
       </Route>
     </Routes>
   )

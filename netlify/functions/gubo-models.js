@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
+import { brand } from '../../src/brand.js'
 
 // Admin: lista os tipos de peça que existem em "Meus produtos" na Gubo, cada
 // um com um SKU de exemplo. É esse SKU que o frete usa pra saber o peso.
@@ -32,6 +33,7 @@ export default async (req) => {
   const { data: auth } = token ? await supabase.auth.getUser(token) : { data: null }
   if (!auth?.user) return json({ error: 'Faça login no admin.' }, 401)
 
+  if (brand.features.shipping !== 'gubo') return json({ error: 'Esta loja não usa a Gubo.' }, 404)
   if (!process.env.GUBO_API_KEY) return json({ error: 'GUBO_API_KEY não configurada na Netlify.' }, 500)
 
   try {

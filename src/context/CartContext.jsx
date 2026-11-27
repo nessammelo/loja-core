@@ -1,8 +1,9 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { storageKey } from '../brand'
 
 const CartContext = createContext(null)
-const CART_KEY = 'edge_cart_v1'
-const CEP_KEY = 'edge_cep_v1'
+const CART_KEY = storageKey('cart_v1')
+const CEP_KEY = storageKey('cep_v1')
 
 export function CartProvider({ children }) {
   // guarda o carrinho no aparelho: no celular o navegador recarrega a aba

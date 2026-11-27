@@ -1,12 +1,14 @@
-// Rastreio de vendas da Edge Crew por link (?ref=nome).
+// Rastreio de vendas de parceiros por link (?ref=nome). Na Edge, é a Crew.
 // Usado no navegador (salvar o ref) e nas Netlify Functions (validar e
 // montar o external_reference do Mercado Pago).
+import { brand, storageKey } from '../brand.js'
 
-// Lista da Crew: só esses refs são aceitos (sem diferenciar maiúscula).
-// Atleta novo = acrescentar o nome aqui (minúsculo, sem espaço).
-export const CREW_REFS = ['pablo', 'luhan', 'monstrinha']
+// Lista de parceiros: só esses refs são aceitos (sem diferenciar maiúscula).
+// Parceiro novo = acrescentar o nome em features.partnerRefs do cliente
+// (clients/<cliente>/brand.js), minúsculo e sem espaço. Lista vazia = desligado.
+export const CREW_REFS = brand.features.partnerRefs.map((r) => String(r).toLowerCase())
 
-const STORAGE_KEY = 'edge_crew_ref'
+const STORAGE_KEY = storageKey('crew_ref')
 const VALID_DAYS = 30
 
 // Devolve o ref normalizado (minúsculo) se for da Crew, senão null.
