@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { fetchProducts } from '../lib/catalog'
 import { fetchBanners } from '../lib/banners'
-import { fetchCollectionSettings, sortGroups, DEFAULT_COLLECTION } from '../lib/collections'
+import { fetchCollectionSettings, sortGroups, collectionSlug, DEFAULT_COLLECTION } from '../lib/collections'
+import { brand } from '../brand'
 import ProductCard from '../components/ProductCard'
 import useSecretSantaEnabled from '../lib/useSecretSantaEnabled'
 
@@ -21,7 +22,7 @@ function groupByCollection(products) {
 export default function Home() {
   const [products, setProducts] = useState([])
   const [allBanners, setBanners] = useState([])
-  const [settings, setSettings] = useState({ order: {}, hidden: new Set() })
+  const [settings, setSettings] = useState({ order: {}, hidden: new Set(), images: {} })
   const [bannerIndex, setBannerIndex] = useState(0)
   const [touchStartX, setTouchStartX] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -52,6 +53,9 @@ export default function Home() {
   const groups = sortGroups(groupByCollection(products), settings.order).filter(
     ([name]) => !settings.hidden.has(name)
   )
+
+  // banners com título ganham o texto por cima (à esquerda) e um hero mais alto
+  const heroWithText = banners.some((b) => (b.title || '').trim())
 
   function go(step) {
     setBannerIndex((i) => (Math.min(i, banners.length - 1) + step + banners.length) % banners.length)
@@ -84,7 +88,7 @@ export default function Home() {
       {banners.length > 0 && (
         <section
           ref={heroRef}
-          className="hero"
+          className={`hero ${heroWithText ? 'hero-with-text' : ''}`}
           aria-roledescription="carrossel"
           aria-label="Destaques"
           onMouseEnter={() => setPaused(true)}
@@ -111,7 +115,15 @@ export default function Home() {
                 loading={i === 0 ? 'eager' : 'lazy'}
                 fetchPriority={i === 0 ? 'high' : 'auto'}
               />
-              {i === current && <BannerButton banner={b} />}
+              {(b.title || '').trim() ? (
+                <div className="hero-text">
+                  <h2>{b.title}</h2>
+                  {b.subtitle && <p>{b.subtitle}</p>}
+                  {i === current && <BannerButton banner={b} inline />}
+                </div>
+              ) : (
+                i === current && <BannerButton banner={b} />
+              )}
             </div>
           ))}
           {banners.length > 1 && (
@@ -148,6 +160,10 @@ export default function Home() {
         </section>
       )}
 
+      {brand.home.collectionCards && groups.length > 0 && (
+        <CollectionCards groups={groups} images={settings.images || {}} />
+      )}
+
       <div className="container" id="colecao">
         {loading && <p className="meta" style={{ paddingTop: 40 }}>Carregando produtos...</p>}
         {error && <p className="meta" style={{ paddingTop: 40 }}>Erro ao carregar produtos: {error}</p>}
@@ -177,27 +193,54 @@ function linkPath(raw) {
   return link
 }
 
+// cards de coleção (foto + nome) antes da lista de produtos (brand.home.collectionCards).
+// Foto: a escolhida em Admin > Coleções ou, sem ela, a capa do primeiro produto.
+function CollectionCards({ groups, images }) {
+  return (
+    <section className="container collection-cards-wrap" id="colecoes">
+      <div className="collection-head">
+        <h2>{brand.home.collectionsTitle}</h2>
+        <div className="rule" />
+      </div>
+      <div className="collection-cards">
+        {groups.map(([name, items]) => {
+          const img = images[name] || items.find((p) => p.image)?.image
+          return (
+            <Link key={name} to={`/colecao/${collectionSlug(name)}`} className="collection-card">
+              <div className="collection-card-img">{img && <img src={img} alt="" loading="lazy" />}</div>
+              <span className="collection-card-label">
+                {name.replace(/-/g, ' ')} <span aria-hidden="true">→</span>
+              </span>
+            </Link>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
 // botão do banner configurado no admin; sem link não mostra botão
-function BannerButton({ banner }) {
+function BannerButton({ banner, inline }) {
   const link = linkPath(banner.cta_link)
   if (!link) return null
   const text = (banner.cta_text || '').trim() || 'Ver mais'
+  const cls = `btn btn-primary ${inline ? 'hero-text-cta' : 'hero-cta'}`
   if (/^https?:\/\//i.test(link)) {
     return (
-      <a href={link} target="_blank" rel="noreferrer" className="btn btn-primary hero-cta">
+      <a href={link} target="_blank" rel="noreferrer" className={cls}>
         {text}
       </a>
     )
   }
   if (link.startsWith('#')) {
     return (
-      <a href={link} className="btn btn-primary hero-cta">
+      <a href={link} className={cls}>
         {text}
       </a>
     )
   }
   return (
-    <Link to={link.startsWith('/') ? link : `/${link}`} className="btn btn-primary hero-cta">
+    <Link to={link.startsWith('/') ? link : `/${link}`} className={cls}>
       {text}
     </Link>
   )
