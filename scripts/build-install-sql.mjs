@@ -41,6 +41,7 @@ export const ORDER = [
   'add_melhor_envio',
   'add_home_vitrine',
   'add_permissoes_api',
+  'add_pedido_whatsapp',
 ]
 
 const head = `-- =====================================================================

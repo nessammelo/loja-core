@@ -3,6 +3,7 @@ import {
   fetchOrders,
   updateOrderStatus,
   markOrderShipped,
+  markOrderPaid,
   fetchOrderEmails,
   sendOrderEmail,
   fetchRescueCoupon,
@@ -36,7 +37,8 @@ const FILTERS = [
 ]
 
 // e-mail automático que sai em cada mudança de status feita no admin
-const EMAIL_ON_STATUS = { repassado: 'producao', enviado: 'enviado', entregue: 'entregue' }
+// ("novo" só é marcado à mão no pedido do WhatsApp: aí sai o "Recebemos seu pedido")
+const EMAIL_ON_STATUS = { novo: 'recebido', repassado: 'producao', enviado: 'enviado', entregue: 'entregue' }
 
 const EMAIL_LABEL = {
   recebido: 'Recebemos seu pedido',
@@ -50,7 +52,13 @@ const EMAIL_LABEL = {
 const fmtDateTime = (d) =>
   d ? new Date(d).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : '—'
 
+// pedido do WhatsApp: pagamento combinado na conversa, a loja confirma aqui
+const isWhatsappOrder = (o) => o.payment_method === 'whatsapp'
+const isWhatsappPending = (o) => isWhatsappOrder(o) && o.status === 'aguardando pagamento'
+const shippingToCombine = (o) => o.shipping_service === 'A combinar no WhatsApp' && !Number(o.shipping_fee)
+
 const nextActionLabel = {
+  'aguardando pagamento': 'Marcar pago',
   novo: brand.copy.markInProgress,
   repassado: 'Marcar enviado',
   enviado: 'Marcar entregue',
@@ -141,6 +149,8 @@ export default function AdminOrders() {
   async function notifyCustomer(order, kind) {
     // venda feita por fora: o "cliente" é a própria loja, não manda e-mail
     if (order.payment_method === 'venda_manual') return
+    // cliente do WhatsApp sem e-mail: a conversa é por lá mesmo
+    if (!order.customers?.email) return
     const r = await sendOrderEmail({ orderId: order.id, kind, auto: true })
     if (r.ok && r.skipped === 'already_sent') {
       setNotice({ ok: true, text: `O e-mail "${EMAIL_LABEL[kind]}" já tinha sido enviado antes.` })
@@ -157,7 +167,11 @@ export default function AdminOrders() {
   async function advance(order) {
     try {
       let next = null
-      if (order.status === 'novo') {
+      if (isWhatsappPending(order)) {
+        if (!window.confirm(`Confirmar que o pedido #${order.id.slice(0, 8)} foi pago?`)) return
+        await markOrderPaid(order.id)
+        next = 'novo'
+      } else if (order.status === 'novo') {
         await updateOrderStatus(order.id, 'repassado')
         next = 'repassado'
       } else if (order.status === 'repassado') {
@@ -301,10 +315,12 @@ export default function AdminOrders() {
                       .join(', ')}
                   </td>
                   <td data-label="Frete">
-                    {Number(o.shipping_fee ?? 0).toLocaleString('pt-BR', {
-                      style: 'currency',
-                      currency: 'BRL',
-                    })}
+                    {shippingToCombine(o)
+                      ? 'A combinar'
+                      : Number(o.shipping_fee ?? 0).toLocaleString('pt-BR', {
+                          style: 'currency',
+                          currency: 'BRL',
+                        })}
                   </td>
                   <td data-label="Total">
                     {Number(o.total).toLocaleString('pt-BR', {
@@ -316,6 +332,7 @@ export default function AdminOrders() {
                     <span className={`status-badge status-${o.status}`}>
                       {statusLabel[o.status] ?? o.status}
                     </span>
+                    {isWhatsappOrder(o) && <div className="meta" style={{ marginTop: 4 }}>Pelo WhatsApp</div>}
                     {o.late_payment && (
                       <div className="order-alert">
                         {o.status === 'cancelado' ? 'Pago depois de cancelar: estornar no MP' : 'Pago depois de expirar: conferir'}
@@ -334,7 +351,7 @@ export default function AdminOrders() {
                     >
                       {isOpen ? 'Fechar' : 'Detalhes'}
                     </button>
-                    {nextActionLabel[o.status] && (
+                    {nextActionLabel[o.status] && (o.status !== 'aguardando pagamento' || isWhatsappPending(o)) && (
                       <button className="btn btn-secondary" onClick={() => advance(o)}>
                         {nextActionLabel[o.status]}
                       </button>
@@ -344,7 +361,7 @@ export default function AdminOrders() {
                         {o.status === 'expirado' ? 'Resgatar' : 'E-mail'}
                       </button>
                     )}
-                    {whatsappLink && o.status !== 'aguardando pagamento' && (
+                    {whatsappLink && (o.status !== 'aguardando pagamento' || isWhatsappOrder(o)) && (
                       <a
                         href={whatsappLink}
                         target="_blank"
@@ -415,7 +432,7 @@ export default function AdminOrders() {
                           )}
                           <p className="order-detail-item">
                             <span>Frete</span>
-                            <span>{Number(o.shipping_fee) > 0 ? brl(o.shipping_fee) : 'Grátis'}</span>
+                            <span>{shippingToCombine(o) ? 'A combinar' : Number(o.shipping_fee) > 0 ? brl(o.shipping_fee) : 'Grátis'}</span>
                           </p>
                           {o.shipping_service && (
                             <p className="order-detail-item">

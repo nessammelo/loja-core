@@ -32,6 +32,25 @@ export async function createOrder({ customer, address, items, shippingQuoteId, c
   return orderId
 }
 
+// Modo pagamento pelo WhatsApp: mesmo checkout, mas o pedido fica
+// "aguardando pagamento" (payment_method 'whatsapp') e a loja marca pago no
+// admin. O servidor recalcula tudo, igual ao createOrder.
+export async function createWhatsappOrder({ customer, address, items, shippingQuoteId, couponCode, combineShipping }) {
+  const { data: orderId, error } = await supabase.rpc('create_whatsapp_order', {
+    p_name: customer.nome,
+    p_email: customer.email,
+    p_phone: customer.telefone,
+    p_cpf: customer.cpf ? customer.cpf.replace(/\D/g, '') : null,
+    p_address: address,
+    p_items: items.map((i) => ({ product_variant_id: i.variantId ?? null, qty: i.qty })),
+    p_coupon_code: couponCode || null,
+    p_shipping_quote_id: shippingQuoteId || null,
+    p_combine_shipping: Boolean(combineShipping),
+  })
+  if (error) throw error
+  return orderId
+}
+
 export async function fetchOrders() {
   const { data, error } = await supabase
     .from('orders')
@@ -43,6 +62,16 @@ export async function fetchOrders() {
 
 export async function updateOrderStatus(orderId, status) {
   const { error } = await supabase.from('orders').update({ status }).eq('id', orderId)
+  if (error) throw error
+}
+
+// Pedido do WhatsApp: a loja confirma o pagamento combinado na conversa
+export async function markOrderPaid(orderId) {
+  const { error } = await supabase
+    .from('orders')
+    .update({ status: 'novo', payment_status: 'approved' })
+    .eq('id', orderId)
+    .eq('status', 'aguardando pagamento')
   if (error) throw error
 }
 

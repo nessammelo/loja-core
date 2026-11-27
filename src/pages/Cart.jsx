@@ -1,7 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 import { describeDelivery, formatCep, useShippingQuote } from '../lib/shipping'
-import { useStoreModes, cartWhatsappUrl } from '../lib/storeModes'
+import { useStoreModes } from '../lib/storeModes'
+import { whatsappStoreUrl } from '../brand'
 
 const brl = (n) => n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 
@@ -14,13 +15,8 @@ export default function Cart() {
   // no frete combinado pelo WhatsApp, não cota (CEP vazio = nenhuma cotação)
   const shipping = useShippingQuote(autoShipping ? cep : '', items)
   const fee = shipping.quote ? Number(shipping.quote.price) : null
-  const whatsappUrl = viaWhatsapp
-    ? cartWhatsappUrl(
-        items,
-        subtotal,
-        autoShipping && fee !== null ? { fee, service: shipping.quote?.serviceName, cep: formatCep(cep) } : null
-      )
-    : ''
+  // no modo WhatsApp o checkout é o mesmo; só o final muda (abre a conversa com o número do pedido)
+  const whatsappReady = Boolean(whatsappStoreUrl())
   const total = subtotal + (fee ?? 0)
   const delivery = describeDelivery(shipping.quote)
 
@@ -116,21 +112,12 @@ export default function Cart() {
         <span>{brl(total)}</span>
       </div>
 
-      {!viaWhatsapp ? (
+      {viaWhatsapp && !whatsappReady ? (
+        <p className="report-warn">WhatsApp da loja ainda não configurado.</p>
+      ) : (
         <button className="btn btn-primary" onClick={() => navigate('/checkout')}>
           Ir para o checkout
         </button>
-      ) : whatsappUrl ? (
-        <>
-          <a className="btn btn-primary" href={whatsappUrl} target="_blank" rel="noreferrer">
-            Finalizar pelo WhatsApp
-          </a>
-          <p className="meta" style={{ marginTop: 12 }}>
-            Abre uma conversa com a loja com a lista dos itens pronta. Pagamento e entrega são combinados por lá.
-          </p>
-        </>
-      ) : (
-        <p className="report-warn">WhatsApp da loja ainda não configurado.</p>
       )}
     </div>
   )

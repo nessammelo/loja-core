@@ -111,7 +111,8 @@ export function orderFinance(o, { costMap = {}, fees = { pix: 0.99, card: 4.98 }
   const athlete = o.crew_athlete || live?.athlete || null
   const pct = athlete ? Number(o.crew_athlete ? o.crew_commission_pct : live?.pct) || 0 : 0
   const commission = round2((net * pct) / 100)
-  const rate = isManual(o) ? 0 : o.payment_method === 'pix' ? fees.pix : fees.card
+  // venda manual e WhatsApp não passam pelo Mercado Pago: sem taxa
+  const rate = isManual(o) || o.payment_method === 'whatsapp' ? 0 : o.payment_method === 'pix' ? fees.pix : fees.card
   const fee = round2((total * rate) / 100)
   return { net, cost: round2(cost), missing, athlete, pct, commission, fee, profit: round2(net - cost - commission - fee) }
 }

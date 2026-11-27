@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
-import { createOrder } from '../lib/orders'
+import { createOrder, createWhatsappOrder } from '../lib/orders'
 import { validateCoupon } from '../lib/coupons'
 import { COUPON_PREFILL_KEY } from './RescueCart'
 import { describeDelivery, formatCep, onlyDigits, useShippingQuote } from '../lib/shipping'
 import { formatCpf, isValidCpf, cpfDigits } from '../lib/cpf'
 import { getStoredRef } from '../lib/crewRef'
 import { brand } from '../brand'
-import { useStoreModes } from '../lib/storeModes'
+import { useStoreModes, orderWhatsappUrl } from '../lib/storeModes'
 
 // Mensagem do cupom aplicado. No progressivo, mostra a faixa e quanto falta pra próxima.
 function couponAppliedMessage(result) {
@@ -28,6 +28,10 @@ export default function Checkout() {
   const { items, subtotal, clearCart, cep, setCep } = useCart()
   const navigate = useNavigate()
   const modes = useStoreModes()
+  // modo WhatsApp: mesmo checkout, mas no fim abre a conversa com o número do pedido
+  const viaWhatsapp = modes.payment === 'whatsapp'
+  // frete combinado na conversa: não cota (CEP continua no endereço)
+  const combineShipping = viaWhatsapp && modes.shipping === 'whatsapp'
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState(null)
   const [form, setForm] = useState({
@@ -80,10 +84,10 @@ export default function Checkout() {
   const [couponChecking, setCouponChecking] = useState(false)
   const [couponMessage, setCouponMessage] = useState(null)
 
-  const shippingQuote = useShippingQuote(cep, items)
-  const shipping = shippingQuote.quote ? Number(shippingQuote.quote.price) : 0
-  const shippingReady = shippingQuote.status === 'ready'
-  const delivery = describeDelivery(shippingQuote.quote)
+  const shippingQuote = useShippingQuote(combineShipping ? '' : cep, items)
+  const shipping = !combineShipping && shippingQuote.quote ? Number(shippingQuote.quote.price) : 0
+  const shippingReady = combineShipping || shippingQuote.status === 'ready'
+  const delivery = combineShipping ? null : describeDelivery(shippingQuote.quote)
 
   const discount = coupon?.valid ? Number(coupon.discount_amount || 0) : 0
   const shippingAfterCoupon = coupon?.free_shipping ? 0 : shipping
@@ -129,18 +133,42 @@ export default function Checkout() {
     }
     setSubmitting(true)
     setError(null)
+    const address = {
+      cep: formatCep(cep),
+      endereco: form.endereco,
+      numero: form.numero,
+      complemento: form.complemento,
+      bairro: form.bairro.trim(),
+      cidade: form.cidade,
+      uf: form.uf.trim().toUpperCase(),
+    }
+    if (viaWhatsapp) {
+      try {
+        const orderId = await createWhatsappOrder({
+          customer: form,
+          address,
+          items,
+          shippingQuoteId: shippingQuote.quote?.quoteId ?? null,
+          couponCode: coupon?.valid ? couponInput.trim() : null,
+          combineShipping,
+        })
+        clearCart()
+        try {
+          localStorage.removeItem(COUPON_PREFILL_KEY)
+        } catch {
+          // sem armazenamento: tudo bem
+        }
+        window.location.assign(orderWhatsappUrl(orderId, total, combineShipping))
+      } catch (err) {
+        setError(err.message)
+        setSubmitting(false)
+      }
+      return
+    }
     try {
       const orderId = await createOrder({
         customer: form,
-        address: {
-          cep: formatCep(cep),
-          endereco: form.endereco,
-          numero: form.numero,
-          complemento: form.complemento,
-          bairro: form.bairro.trim(),
-          cidade: form.cidade,
-          uf: form.uf.trim().toUpperCase(),
-        },
+        address,
         items,
         shippingQuoteId: shippingQuote.quote?.quoteId ?? null,
         couponCode: coupon?.valid ? couponInput.trim() : null,
@@ -168,9 +196,6 @@ export default function Checkout() {
       setSubmitting(false)
     }
   }
-
-  // loja no modo WhatsApp não tem checkout: o carrinho fecha pela conversa
-  if (!modes.loading && modes.payment === 'whatsapp') return <Navigate to="/carrinho" replace />
 
   if (items.length === 0) {
     return (
@@ -385,7 +410,9 @@ export default function Checkout() {
           <div className="summary-line">
             <span>Frete</span>
             <span>
-              {shippingQuote.status === 'loading'
+              {combineShipping
+                ? 'Combinado no WhatsApp'
+                : shippingQuote.status === 'loading'
                 ? 'Calculando...'
                 : !shippingReady
                   ? 'Informe o CEP'
@@ -405,7 +432,7 @@ export default function Checkout() {
         </div>
 
         <div className="cart-summary" style={{ maxWidth: 560 }}>
-          <span>Total</span>
+          <span>{combineShipping ? 'Subtotal' : 'Total'}</span>
           <span>
             {total.toLocaleString('pt-BR', {
               style: 'currency',
@@ -415,8 +442,9 @@ export default function Checkout() {
         </div>
 
         <p className="meta" style={{ marginBottom: 20, color: 'var(--text-muted)', fontSize: 13 }}>
-          Ao finalizar, você é redirecionado pro Mercado Pago pra pagar via Pix
-          ou cartão.
+          {viaWhatsapp
+            ? `Ao finalizar, abre uma conversa no WhatsApp com a ${brand.name} com o número do seu pedido, pra combinar o pagamento${combineShipping ? ' e o frete' : ''}.`
+            : 'Ao finalizar, você é redirecionado pro Mercado Pago pra pagar via Pix ou cartão.'}
         </p>
 
         {error && (
@@ -427,12 +455,16 @@ export default function Checkout() {
 
         <button className="btn btn-primary" type="submit" disabled={submitting || !shippingReady}>
           {submitting
-            ? 'Redirecionando...'
-            : shippingQuote.status === 'loading'
+            ? viaWhatsapp
+              ? 'Abrindo o WhatsApp...'
+              : 'Redirecionando...'
+            : !combineShipping && shippingQuote.status === 'loading'
               ? 'Calculando frete...'
               : onlyDigits(cep).length !== 8
                 ? 'Informe o CEP'
-                : 'Ir pro pagamento'}
+                : viaWhatsapp
+                  ? 'Finalizar pelo WhatsApp'
+                  : 'Ir pro pagamento'}
         </button>
       </form>
     </div>
