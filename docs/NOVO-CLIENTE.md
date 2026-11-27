@@ -40,7 +40,8 @@ que também explica cada campo. Pontos de atenção:
 - `theme.fonts.googleFontsUrl`: um link do Google Fonts com todas as fontes usadas.
 - `email.*`: o e-mail não lê o CSS do site, então as cores dele ficam aqui.
 - `copy.*`: frases de marca dos e-mails e do WhatsApp.
-- `features`: deixe tudo desligado, a não ser que o cliente tenha pedido.
+- `contact.whatsapp`: obrigatório no modo WhatsApp (é pra onde vai o carrinho e o "Quero personalizado").
+- `features`: deixe tudo desligado, a não ser que o cliente tenha pedido. `paymentMode` e `shippingMode` são só o modo inicial: a cliente troca no admin.
 
 ## 3. Testar no computador
 
@@ -69,10 +70,14 @@ preview dos e-mails (Admin > Pedidos > E-mail).
 | `VITE_SUPABASE_URL` | URL do Supabase do cliente |
 | `VITE_SUPABASE_ANON_KEY` | chave anon |
 | `SUPABASE_SERVICE_ROLE_KEY` | chave service_role (só servidor) |
-| `MP_ACCESS_TOKEN` | opcional, Mercado Pago |
 | `RESEND_API_KEY`, `EMAIL_FROM`, `EMAIL_REPLY_TO` | opcional, e-mails automáticos |
 
 3. Deploy. Toda melhoria no core chega nesse site no próximo deploy.
+
+O Mercado Pago não vai na Netlify: a própria cliente cola o Access Token em
+Admin > Pagamento e frete. A chave é testada e fica guardada só no servidor
+(tabela `store_secrets`, sem acesso público). Precisa do SQL
+`supabase/add_modos_pagamento_frete.sql`.
 
 ## 6. Entregar
 
@@ -88,3 +93,6 @@ preview dos e-mails (Admin > Pedidos > E-mail).
 | `shipping: 'gubo'` | frete pela API da Gubo e tela Admin > Frete | `GUBO_API_KEY` na Netlify |
 | `shipping: 'fixed'` | frete fixo (padrão) | nada |
 | `cancelReasons: [...]` | motivos extras de cancelamento | nada |
+| `customOrder: true` | botão "Quero personalizado" no produto, abre o WhatsApp | `contact.whatsapp` |
+| `paymentMode` | modo inicial de pagamento: `'whatsapp'` ou `'mercadopago'` | Mercado Pago conectado no admin |
+| `shippingMode` | modo inicial de frete: `'whatsapp'` ou `'auto'` | nada |

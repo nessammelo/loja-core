@@ -21,6 +21,7 @@ import AdminInfo from './pages/admin/AdminInfo'
 import AdminAmigo from './pages/admin/AdminAmigo'
 import AdminShipping from './pages/admin/AdminShipping'
 import AdminReports from './pages/admin/AdminReports'
+import AdminPayments from './pages/admin/AdminPayments'
 import AmigoHome from './pages/amigo/AmigoHome'
 import AmigoCriar from './pages/amigo/AmigoCriar'
 import AmigoEntrar from './pages/amigo/AmigoEntrar'
@@ -72,6 +73,7 @@ export default function App() {
         <Route path="produtos/:productId" element={<AdminProductForm />} />
         <Route path="banners" element={<AdminBanners />} />
         <Route path="cupons" element={<AdminCoupons />} />
+        <Route path="pagamento" element={<AdminPayments />} />
         <Route path="medidas" element={<AdminInfo />} />
         <Route path="colecoes" element={<AdminCollections />} />
         {brand.features.shipping === 'gubo' && <Route path="frete" element={<AdminShipping />} />}

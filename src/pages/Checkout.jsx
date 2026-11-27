@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 import { createOrder } from '../lib/orders'
 import { validateCoupon } from '../lib/coupons'
@@ -8,6 +8,7 @@ import { describeDelivery, formatCep, onlyDigits, useShippingQuote } from '../li
 import { formatCpf, isValidCpf, cpfDigits } from '../lib/cpf'
 import { getStoredRef } from '../lib/crewRef'
 import { brand } from '../brand'
+import { useStoreModes } from '../lib/storeModes'
 
 // Mensagem do cupom aplicado. No progressivo, mostra a faixa e quanto falta pra próxima.
 function couponAppliedMessage(result) {
@@ -26,6 +27,7 @@ function couponAppliedMessage(result) {
 export default function Checkout() {
   const { items, subtotal, clearCart, cep, setCep } = useCart()
   const navigate = useNavigate()
+  const modes = useStoreModes()
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState(null)
   const [form, setForm] = useState({
@@ -166,6 +168,9 @@ export default function Checkout() {
       setSubmitting(false)
     }
   }
+
+  // loja no modo WhatsApp não tem checkout: o carrinho fecha pela conversa
+  if (!modes.loading && modes.payment === 'whatsapp') return <Navigate to="/carrinho" replace />
 
   if (items.length === 0) {
     return (

@@ -16,6 +16,8 @@ import { fetchCollectionSettings } from '../lib/collections'
 import ProductCard from '../components/ProductCard'
 import { savedGroups, addToWishlist } from '../lib/secretSanta'
 import useSecretSantaEnabled from '../lib/useSecretSantaEnabled'
+import { useStoreModes } from '../lib/storeModes'
+import { brand, whatsappStoreUrl } from '../brand'
 
 export default function ProductDetail() {
   const { id } = useParams()
@@ -28,6 +30,7 @@ export default function ProductDetail() {
   const [ssStatus, setSsStatus] = useState(null) // { ok, text }
 
   const [product, setProduct] = useState(null)
+  const modes = useStoreModes()
   const [loading, setLoading] = useState(true)
   const [modelId, setModelId] = useState(null)
   const [size, setSize] = useState(null)
@@ -334,8 +337,19 @@ export default function ProductDetail() {
             </div>
           )}
 
+          {brand.features.customOrder && whatsappStoreUrl() && (
+            <a
+              className="btn btn-secondary pdp-custom"
+              href={whatsappStoreUrl(brand.copy.customOrderMessage.replace('{produto}', product.name))}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {brand.copy.customOrderLabel}
+            </a>
+          )}
+
           <div className="pdp-info">
-            <span>Frete calculado pelo CEP no carrinho</span>
+            <span>{modes.shipping === 'auto' ? 'Frete calculado pelo CEP no carrinho' : 'Frete combinado pelo WhatsApp'}</span>
             {settings[SETTING_KEYS.delivery] && <span>{settings[SETTING_KEYS.delivery]}</span>}
             {settings[SETTING_KEYS.returns] && <span>{settings[SETTING_KEYS.returns]}</span>}
           </div>

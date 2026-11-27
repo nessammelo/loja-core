@@ -1,8 +1,8 @@
-import { MercadoPagoConfig, Preference } from 'mercadopago'
+import { Preference } from 'mercadopago'
 import { createClient } from '@supabase/supabase-js'
 import { normalizeRef, buildExternalReference } from '../../src/lib/crewRef.js'
+import { mpClient } from '../lib/secrets.js'
 
-const client = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN })
 const supabase = createClient(process.env.VITE_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
 
 export default async (req) => {
@@ -91,7 +91,7 @@ export default async (req) => {
       })
     }
 
-    const preference = new Preference(client)
+    const preference = new Preference(await mpClient())
     const result = await preference.create({
       body: {
         items: mpItems,

@@ -87,6 +87,9 @@ const DEFAULTS = {
     // e-mail e WhatsApp "Entregue"
     deliveredWish: 'Esperamos que você goste muito.',
     deliveredShare: 'E se curtiu, marca a gente nas fotos.',
+    // botão "Quero personalizado" na página do produto (features.customOrder). {produto} vira o nome da peça.
+    customOrderLabel: 'Quero personalizado',
+    customOrderMessage: 'Oi! Vi a peça {produto} no site e queria uma personalizada.',
     // nome do status entre "Novo" e "Enviado"
     statusInProgress: 'Em produção',
     markInProgress: 'Marcar em produção',
@@ -98,8 +101,15 @@ const DEFAULTS = {
     secretSanta: false,
     // Links de parceiros (?ref=nome) e repasse por cupom. Lista vazia = desligado.
     partnerRefs: [],
-    // Como o frete é calculado: 'fixed' (valor fixo da loja) ou 'gubo' (API da Gubo)
+    // Como o frete é calculado quando está no automático: 'fixed' (valor fixo) ou 'gubo' (API da Gubo)
     shipping: 'fixed',
+    // Modo inicial de pagamento e frete. A cliente troca em Admin > Pagamento e frete.
+    //   paymentMode: 'whatsapp' (carrinho fecha no WhatsApp) | 'mercadopago' (checkout com Pix e cartão)
+    //   shippingMode: 'whatsapp' (frete combinado na conversa) | 'auto' (calculado pelo CEP)
+    paymentMode: 'whatsapp',
+    shippingMode: 'whatsapp',
+    // Botão "Quero personalizado" na página do produto (abre o WhatsApp da loja)
+    customOrder: false,
     // Motivos de cancelamento extras no admin
     cancelReasons: [],
   },

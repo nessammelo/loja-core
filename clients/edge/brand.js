@@ -77,6 +77,8 @@ export default {
     secretSanta: true,
     partnerRefs: ['pablo', 'luhan', 'monstrinha'],
     shipping: 'gubo',
+    paymentMode: 'mercadopago',
+    shippingMode: 'auto',
     cancelReasons: ['Peça indisponível na Gubo'],
   },
 }

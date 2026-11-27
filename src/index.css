@@ -2576,3 +2576,43 @@ td {
   font-size: 1.15rem;
   letter-spacing: 0.08em;
 }
+
+/* Botão "Quero personalizado" (features.customOrder) */
+.pdp-custom {
+  margin-top: 12px;
+}
+
+/* Admin > Pagamento e frete */
+.mode-options {
+  display: grid;
+  gap: 10px;
+  margin: 12px 0 8px;
+}
+.mode-option {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.mode-option.active {
+  border-color: var(--text);
+}
+.mode-option.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.mode-option input {
+  margin-top: 4px;
+}
+.mode-option strong {
+  display: block;
+}
+.key-status {
+  margin: 8px 0 12px;
+}
+.key-status.ok {
+  color: var(--text);
+}
