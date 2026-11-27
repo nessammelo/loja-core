@@ -69,9 +69,8 @@ export default function AdminBanners() {
       <h2>Banners da home</h2>
       <div className="rule" />
       <p className="meta" style={{ marginBottom: 20 }}>
-        Tamanho recomendado: 2880 × 800px (proporção 1440 × 400). Eles passam sozinhos na home,
-        um a cada 6 segundos, na ordem desta lista: use as setas para mudar a ordem. Deixe o
-        texto/logo do lado esquerdo: no celular a imagem é recortada pela direita.
+        Tamanho recomendado: 2880 × 800px (proporção 1440 × 400). Nesse tamanho a imagem aparece inteira, sem corte, no computador e no celular. Eles passam sozinhos na home,
+        um a cada 6 segundos, na ordem desta lista: use as setas para mudar a ordem.
       </p>
 
       {error && (

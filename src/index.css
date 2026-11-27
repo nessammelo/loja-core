@@ -139,13 +139,13 @@ button {
 }
 
 /* Só pra elementos da coleção Road to Vegas */
-/* Hero — altura limitada (≈28% da largura, no máx. 400px) pra os produtos
-   aparecerem logo abaixo. A imagem é recortada (cover) e o texto dos banners
-   fica à esquerda, por isso o recorte ancora na esquerda. */
+/* Hero — sempre na proporção 1440 × 400 (a mesma pedida no admin), em
+   qualquer largura de tela. Assim a imagem enviada no tamanho recomendado
+   aparece inteira, sem corte. */
 .hero {
   position: relative;
   width: 100%;
-  height: clamp(190px, 28vw, 400px);
+  aspect-ratio: 1440 / 400;
   line-height: 0;
   overflow: hidden;
   background: var(--bg);
@@ -195,9 +195,6 @@ button {
 }
 
 @media (max-width: 720px) {
-  .hero {
-    height: 200px;
-  }
   .hero .carousel-arrow {
     display: none; /* no celular: deslizar o dedo */
   }
@@ -217,10 +214,6 @@ button {
 }
 
 /* Texto por cima do banner (título, subtítulo e botão à esquerda) */
-.hero.hero-with-text {
-  height: clamp(320px, 40vw, 540px);
-}
-
 .hero-text {
   position: absolute;
   inset: 0;
@@ -307,19 +300,26 @@ button {
 }
 
 @media (max-width: 720px) {
+  /* no celular o texto vai pra baixo da imagem, pra imagem continuar inteira */
   .hero.hero-with-text {
-    height: 380px;
+    aspect-ratio: auto;
+    display: grid;
+  }
+  .hero.hero-with-text .hero-slide {
+    position: relative;
+    inset: auto;
+    grid-area: 1 / 1;
+  }
+  .hero.hero-with-text img {
+    height: auto;
+    aspect-ratio: 1440 / 400;
   }
   .hero-text {
+    position: static;
     width: 100%;
-    justify-content: flex-end;
-    padding: 0 20px 44px;
-    background: linear-gradient(
-      0deg,
-      color-mix(in srgb, var(--bg) 92%, transparent) 0%,
-      color-mix(in srgb, var(--bg) 75%, transparent) 55%,
-      transparent 85%
-    );
+    gap: 10px;
+    padding: 20px 20px 44px;
+    background: var(--bg);
   }
   .collection-cards {
     grid-template-columns: repeat(2, 1fr);
