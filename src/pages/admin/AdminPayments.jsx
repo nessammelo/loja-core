@@ -45,11 +45,18 @@ export default function AdminPayments() {
   const [token, setToken] = useState('')
   const [busy, setBusy] = useState(false)
   const [msg, setMsg] = useState(null)
+  const [me, setMe] = useState(null) // { connected, account, error, cep, env }
+  const [meForm, setMeForm] = useState({ token: '', cep: '', env: 'sandbox' })
+  const [meError, setMeError] = useState(null)
+  const usesMelhorEnvio = brand.features.shipping === 'melhorenvio'
 
   useEffect(() => {
     fetchStoreModes().then(setModes)
     storeKeys('GET')
-      .then((d) => setMp(d.mercadopago))
+      .then((d) => {
+        setMp(d.mercadopago)
+        setMe(d.melhorenvio)
+      })
       .catch((e) => {
         setMp({ connected: false })
         setMpError(e.message)
@@ -80,6 +87,34 @@ export default function AdminPayments() {
       setToken('')
     } catch (err) {
       setMpError(err.message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function connectMe(e) {
+    e.preventDefault()
+    setBusy(true)
+    setMeError(null)
+    try {
+      const d = await storeKeys('POST', { provider: 'melhorenvio', ...meForm })
+      setMe(d.melhorenvio)
+      setMeForm((f) => ({ ...f, token: '' }))
+    } catch (err) {
+      setMeError(err.message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function removeMe() {
+    setBusy(true)
+    setMeError(null)
+    try {
+      const d = await storeKeys('POST', { provider: 'melhorenvio', remove: true })
+      setMe(d.melhorenvio)
+    } catch (err) {
+      setMeError(err.message)
     } finally {
       setBusy(false)
     }
@@ -195,9 +230,76 @@ export default function AdminPayments() {
           <Option name="shipping" value="auto" current={modes.shipping} onChange={(v) => saveMode('shipping', v)} title="Calculado no site">
             {brand.features.shipping === 'gubo'
               ? 'O cliente informa o CEP e o frete é cotado na Gubo.'
-              : 'O cliente informa o CEP e vê o frete fixo da loja.'}
+              : usesMelhorEnvio
+                ? 'O cliente informa o CEP e vê o frete mais barato do Melhor Envio (PAC, SEDEX, Mini Envios...).'
+                : 'O cliente informa o CEP e vê o frete fixo da loja.'}
           </Option>
         </div>
+
+        {usesMelhorEnvio && (
+          <>
+            <h3 style={{ marginTop: 24 }}>Melhor Envio</h3>
+            {me === null ? (
+              <p className="meta">Verificando...</p>
+            ) : me.connected ? (
+              <>
+                <p className="key-status ok">
+                  Conectado{me.account ? ` como ${me.account}` : ''} · envia do CEP {me.cep} ·{' '}
+                  {me.env === 'producao' ? 'produção' : 'modo de teste'}.
+                </p>
+                <button className="btn btn-secondary btn-sm" onClick={removeMe} disabled={busy}>
+                  Desconectar
+                </button>
+              </>
+            ) : (
+              <form onSubmit={connectMe}>
+                <p className="meta">
+                  No Melhor Envio, vá em Integrações &gt; Permissões de acesso, gere um token com permissão de
+                  cotação (shipping-calculate) e cole aqui. Enquanto o token não estiver ligado, a loja cobra o
+                  frete fixo de reserva.
+                </p>
+                {me.error && <p className="report-warn">O token salvo parou de funcionar: {me.error}</p>}
+                <div className="field">
+                  <label htmlFor="me-token">Token</label>
+                  <input
+                    id="me-token"
+                    type="password"
+                    autoComplete="off"
+                    value={meForm.token}
+                    onChange={(e) => setMeForm((f) => ({ ...f, token: e.target.value }))}
+                  />
+                </div>
+                <div className="form-grid">
+                  <div className="field">
+                    <label htmlFor="me-cep">CEP de onde a loja envia</label>
+                    <input
+                      id="me-cep"
+                      inputMode="numeric"
+                      placeholder="00000-000"
+                      value={meForm.cep}
+                      onChange={(e) => setMeForm((f) => ({ ...f, cep: e.target.value }))}
+                    />
+                  </div>
+                  <div className="field">
+                    <label htmlFor="me-env">Ambiente</label>
+                    <select
+                      id="me-env"
+                      value={meForm.env}
+                      onChange={(e) => setMeForm((f) => ({ ...f, env: e.target.value }))}
+                    >
+                      <option value="sandbox">Teste (sandbox)</option>
+                      <option value="producao">Produção</option>
+                    </select>
+                  </div>
+                </div>
+                <button className="btn btn-primary" type="submit" disabled={busy || !meForm.token.trim()}>
+                  {busy ? 'Testando...' : 'Testar e conectar'}
+                </button>
+              </form>
+            )}
+            {meError && <p className="report-warn">{meError}</p>}
+          </>
+        )}
       </section>
 
       {msg && <p className="meta">{msg}</p>}

@@ -101,13 +101,18 @@ const DEFAULTS = {
     secretSanta: false,
     // Links de parceiros (?ref=nome) e repasse por cupom. Lista vazia = desligado.
     partnerRefs: [],
-    // Como o frete é calculado quando está no automático: 'fixed' (valor fixo) ou 'gubo' (API da Gubo)
+    // Como o frete é calculado quando está no automático: 'fixed' (valor fixo), 'gubo' (API da Gubo)
+    // ou 'melhorenvio' (Melhor Envio, chaves coladas no admin)
     shipping: 'fixed',
     // Modo inicial de pagamento e frete. A cliente troca em Admin > Pagamento e frete.
     //   paymentMode: 'whatsapp' (carrinho fecha no WhatsApp) | 'mercadopago' (checkout com Pix e cartão)
     //   shippingMode: 'whatsapp' (frete combinado na conversa) | 'auto' (calculado pelo CEP)
     paymentMode: 'whatsapp',
     shippingMode: 'whatsapp',
+    // Frete 'melhorenvio': dias de produção somados ao prazo da transportadora
+    // e medida usada quando o produto não tem peso/medidas cadastrados.
+    productionDays: 0,
+    defaultPackage: { weightG: 500, lengthCm: 25, widthCm: 20, heightCm: 10 },
     // Botão "Quero personalizado" na página do produto (abre o WhatsApp da loja)
     customOrder: false,
     // Motivos de cancelamento extras no admin

@@ -14,6 +14,7 @@ import {
 } from '../../lib/catalog'
 import { fetchSizeCharts, parseSpecs, specsToText } from '../../lib/storeInfo'
 import { fetchProductCosts, saveProductCosts } from '../../lib/costs'
+import { brand } from '../../brand'
 
 const COMMON_SIZES = ['PP', 'P', 'M', 'G', 'GG', 'XG', 'XGG']
 const MAX_PHOTOS = 4
@@ -87,6 +88,9 @@ export default function AdminProductForm() {
   const [colorImages, setColorImages] = useState({})
   const [models, setModels] = useState([emptyModel()])
   const [specsText, setSpecsText] = useState('')
+  // peso e medidas pro frete do Melhor Envio (vazio = padrão da loja)
+  const [pkg, setPkg] = useState({ weight_g: '', length_cm: '', width_cm: '', height_cm: '' })
+  const usesPackage = brand.features.shipping === 'melhorenvio'
   const [chartNames, setChartNames] = useState([])
 
   const [palette, setPalette] = useState(DEFAULT_COLOR_HEX)
@@ -121,6 +125,12 @@ export default function AdminProductForm() {
         )
         setColorImages(p.color_images && typeof p.color_images === 'object' ? p.color_images : {})
         setSpecsText(specsToText(p.specs))
+        setPkg({
+          weight_g: p.weight_g ?? '',
+          length_cm: p.length_cm ?? '',
+          width_cm: p.width_cm ?? '',
+          height_cm: p.height_cm ?? '',
+        })
         const savedCharts = p.model_charts && typeof p.model_charts === 'object' ? p.model_charts : {}
 
         const byModel = new Map()
@@ -250,6 +260,9 @@ export default function AdminProductForm() {
         imageUrls,
         colorImages: cleanedColorImages,
         specs: parseSpecs(specsText),
+        pkg: usesPackage
+          ? Object.fromEntries(Object.entries(pkg).map(([k, v]) => [k, v === '' ? null : Number(v)]))
+          : undefined,
         modelCharts: Object.fromEntries(
           models.filter((m) => m.chart).map((m) => [m.label.trim(), m.chart])
         ),
@@ -339,6 +352,37 @@ export default function AdminProductForm() {
             &lt;ul&gt;&lt;li&gt;, &lt;h3&gt;, &lt;a href&gt;.
           </p>
         </div>
+
+        {usesPackage && (
+          <div className="field">
+            <label>Peso e medidas da embalagem (pro frete)</label>
+            <div className="form-grid">
+              {[
+                ['weight_g', 'Peso (g)'],
+                ['length_cm', 'Comprimento (cm)'],
+                ['width_cm', 'Largura (cm)'],
+                ['height_cm', 'Altura (cm)'],
+              ].map(([k, label]) => (
+                <div className="field" key={k}>
+                  <label htmlFor={`pkg-${k}`}>{label}</label>
+                  <input
+                    id={`pkg-${k}`}
+                    type="number"
+                    min="0"
+                    step={k === 'weight_g' ? '10' : '0.5'}
+                    value={pkg[k]}
+                    onChange={(e) => setPkg((s) => ({ ...s, [k]: e.target.value }))}
+                  />
+                </div>
+              ))}
+            </div>
+            <span className="meta">
+              Vazio usa a medida padrão da loja ({brand.features.defaultPackage.weightG} g,{' '}
+              {brand.features.defaultPackage.lengthCm} x {brand.features.defaultPackage.widthCm} x{' '}
+              {brand.features.defaultPackage.heightCm} cm).
+            </span>
+          </div>
+        )}
 
         <div className="field">
           <label htmlFor="specs">Especificações (uma por linha)</label>
