@@ -7,3 +7,11 @@
   from = "/*"
   to = "/index.html"
   status = 200
+
+# Sem deploy de PR nem de outros ramos: só o main (produção) gera build.
+# Economiza os créditos do plano grátis da Netlify. "exit 0" = pular o build.
+[context.deploy-preview]
+  ignore = "exit 0"
+
+[context.branch-deploy]
+  ignore = "exit 0"
